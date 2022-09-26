@@ -68,17 +68,18 @@ AIOT_DEVICE_MAPPING = [{
     # Aqara M1S网关
     'lumi.gateway.acn01': ["Aqara", "Gateway M1S", "ZHWG15LM"],
     'params': [
+        # {
+        #     "remote": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "pair",
+        #             "supported_features": 0
+        #         },
+        #         MK_RESOURCES: {
+        #             "pair": ("8.0.2109", "_attr_is_on"),
+        #         }
+        #     }
+        # }, 
         {
-            "remote": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "pair",
-                    "supported_features": 0
-                },
-                MK_RESOURCES: {
-                    "pair": ("8.0.2109", "_attr_is_on"),
-                }
-            }
-        }, {
             "light": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "light",
@@ -106,17 +107,18 @@ AIOT_DEVICE_MAPPING = [{
 },{
     'lumi.aircondition.acn05': ["Aqara", "AirCondition P3", "KTBL12LM"],
     'params': [
+        # {
+        #     "remote": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "pair",
+        #             "supported_features": 0
+        #         },
+        #         MK_RESOURCES: {
+        #             "pair": ("8.0.2109", "_attr_is_on"),
+        #         }
+        #     }
+        # }, 
         {
-            "remote": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "pair",
-                    "supported_features": 0
-                },
-                MK_RESOURCES: {
-                    "pair": ("8.0.2109", "_attr_is_on"),
-                }
-            }
-        }, {
             "remote": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "ir",
@@ -131,32 +133,33 @@ AIOT_DEVICE_MAPPING = [{
 }, {
     'lumi.gateway.aqcn02': ["Aqara", "Hub E1", "ZHWG16LM"],
     'params': [
-        {
-            "remote": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "pair",
-                    "supported_features": 0
-                },
-                MK_RESOURCES: {
-                    "pair": ("8.0.2109", "_attr_is_on"),
-                }
-            }
-        }
+        # {
+        #     "remote": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "pair",
+        #             "supported_features": 0
+        #         },
+        #         MK_RESOURCES: {
+        #             "pair": ("8.0.2109", "_attr_is_on"),
+        #         }
+        #     }
+        # }
     ]
 }, {
     'lumi.gateway.iragl5': ["Aqara", "Gateway M2", "ZHWG12LM"],
     'params': [
+        # {
+        #     "remote": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "pair",
+        #             "supported_features": 0
+        #         },
+        #         MK_RESOURCES: {
+        #             "pair": ("8.0.2109", "_attr_is_on"),
+        #         }
+        #     }
+        # },
         {
-            "remote": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "pair",
-                    "supported_features": 0
-                },
-                MK_RESOURCES: {
-                    "pair": ("8.0.2109", "_attr_is_on"),
-                }
-            }
-        }, {
             "remote": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "ir",
@@ -171,62 +174,63 @@ AIOT_DEVICE_MAPPING = [{
 }, {
     'lumi.gateway.sacn01': ["Aqara", "Smart Hub H1", "QBCZWG11LM"],
     'params': [
-        {
-            "remote": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "pair",
-                    "supported_features": 0
-                },
-                MK_RESOURCES: {
-                    "pair": ("8.0.2109", "_attr_is_on"),
-                }
-            }
-        }
+        # {
+        #     "remote": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "pair",
+        #             "supported_features": 0
+        #         },
+        #         MK_RESOURCES: {
+        #             "pair": ("8.0.2109", "_attr_is_on"),
+        #         }
+        #     }
+        # }
     ]
 }, {
     'lumi.camera.gwagl02': ["Aqara", "Camera Hub G2H", "ZNSXJ12LM"],
     'params': [
-        {
-            "remote": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "pair",
-                    "supported_features": 0
-                },
-                MK_RESOURCES: {
-                    "pair": ("8.0.2109", "_attr_is_on"),
-                }
-            }
-        }
+        # {
+        #     "remote": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "pair",
+        #             "supported_features": 0
+        #         },
+        #         MK_RESOURCES: {
+        #             "pair": ("8.0.2109", "_attr_is_on"),
+        #         }
+        #     }
+        # }
     ]
 }, {
     'lumi.camera.gwpagl01': ["Aqara", "Camera Hub G3", "ZNSXJ13LM"],
     'params': [
-        {
-            "remote": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "pair",
-                    "supported_features": 0
-                },
-                MK_RESOURCES: {
-                    "pair": ("8.0.2109", "_attr_is_on"),
-                }
-            }
-        }
+        # {
+        #     "remote": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "pair",
+        #             "supported_features": 0
+        #         },
+        #         MK_RESOURCES: {
+        #             "pair": ("8.0.2109", "_attr_is_on"),
+        #         }
+        #     }
+        # }
     ]
 }, {
     'lumi.gateway.acn004': ["Aqara", "Gateway M1S22", "ZHWG20LM"],
     'params': [
+        # {
+        #     "remote": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "pair",
+        #             "supported_features": 0
+        #         },
+        #         MK_RESOURCES: {
+        #             "pair": ("8.0.2109", "_attr_is_on"),
+        #         }
+        #     }
+        # }, 
         {
-            "remote": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "pair",
-                    "supported_features": 0
-                },
-                MK_RESOURCES: {
-                    "pair": ("8.0.2109", "_attr_is_on"),
-                }
-            }
-        }, {
             "light": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "light",
@@ -631,17 +635,18 @@ AIOT_DEVICE_MAPPING = [{
                     "position": ("1.1.85", "_attr_current_cover_position"),
                 },
             },
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
         }
+        # , {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }
     ]
 }, {
     'lumi.sensor_switch': ["Xiaomi", "Button", "WXKG01LM"],
@@ -657,17 +662,19 @@ AIOT_DEVICE_MAPPING = [{
     # 无线开关 T1（贴墙式单键）
     'lumi.remote.b186acn03': ["Aqara", "Single Wall Button T1", "WXKG03LM"],
     'params': [
+        # {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+
+        #     }
+        # }, 
         {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
-        }, {
             "sensor": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "action",
@@ -692,17 +699,18 @@ AIOT_DEVICE_MAPPING = [{
     # 无线开关 T1（贴墙式双键）
     'lumi.remote.b286acn03': ["Aqara", "Double Wall Button T1", "WXKG04LM"],
     'params': [
+        # {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }, 
         {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
-        }, {
             "sensor": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "action",
@@ -717,17 +725,18 @@ AIOT_DEVICE_MAPPING = [{
 }, {
     'lumi.remote.rkba01': ["Aqara", "Smart Knob H1", "ZNXNKG02LM"],
     'params': [
+        # {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }, 
         {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
-        }, {
             "sensor": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "action",
@@ -767,17 +776,18 @@ AIOT_DEVICE_MAPPING = [{
                 },
 
             }
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
-        }
+        }, 
+        # {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }
     ]
 }, {
     'lumi.plug': ["Xiaomi", "Plug", "ZNCZ02LM"],
@@ -839,17 +849,18 @@ AIOT_DEVICE_MAPPING = [{
                 },
 
             }
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
-        }
+        },
+        #  {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }
     ]
 }, {
     'lumi.motion.agl02': ["Aqara", "Motion Sensor T1", "RTCGQ12LM"],
@@ -869,17 +880,19 @@ AIOT_DEVICE_MAPPING = [{
                 },
 
             }
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            },
-        }, {
+        },
+        # ,{
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     },
+        # },
+        {
             "sensor": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "illuminance",
@@ -911,17 +924,18 @@ AIOT_DEVICE_MAPPING = [{
                     "voltage": ("8.0.2008", "_attr_voltage")
                 },
             }
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
         }
+        # , {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }
     ]
 }, {
     # motion sensor with illuminance
@@ -942,33 +956,35 @@ AIOT_DEVICE_MAPPING = [{
                 },
 
             }
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
         }
+        # , {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }
     ]
 }, {
     # temperature and humidity sensor
     'lumi.sensor_ht': ["Xiaomi", "TH Sensor", "WSDCGQ01LM"],
     'params': [
+        # {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }, 
         {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
-        }, {
             "sensor": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "temperature",
@@ -995,17 +1011,18 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.weather': ["Aqara", "TH Sensor", "WSDCGQ11LM"],
     'lumi.sensor_ht.agl02': ["Aqara", "TH Sensor", "WSDCGQ12LM"],
     'params': [
+        # {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }, 
         {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
-        }, {
             "sensor": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "temperature",
@@ -1057,17 +1074,18 @@ AIOT_DEVICE_MAPPING = [{
                     "voltage": ("8.0.2008", "_attr_voltage")
                 },
             }
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
         }
+        # , {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }
     ]
 }, {
     'lumi.sen_ill.agl01': ["Aqara", "Light Sensor T1", "GZCGQ11LM"],
@@ -1083,17 +1101,18 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {"illumination": ("0.3.85", "_attr_native_value")},
             }
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
         }
+        # , {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }
     ]
 }, {
     'lumi.sensor_smoke': ["Honeywell", "Smoke Sensor", "JTYJ-GD-01LM/BW"],
@@ -1121,17 +1140,18 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {"smoke": ("0.1.85", "_attr_native_value")},
             }
-        }, {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
         }
+        # , {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }
     ]
 }, {
     'lumi.sensor_natgas': ["Honeywell", "Gas Sensor", "JTQJ-BF-01LM/BW"],
@@ -1164,17 +1184,18 @@ AIOT_DEVICE_MAPPING = [{
 }, {
     'lumi.airmonitor.acn01': ["Aqara", "Smart TVOC Air Quality Monitor", "VOCKQJK11LM"],
     'params': [
+        # {
+        #     "sensor": {
+        #         MK_INIT_PARAMS: {
+        #             MK_HASS_NAME: "battery",
+        #             "device_class": DEVICE_CLASS_BATTERY,
+        #             "state_class": "measurement",
+        #             "unit_of_measurement": PERCENTAGE
+        #         },
+        #         MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
+        #     }
+        # }, 
         {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "battery",
-                    "device_class": DEVICE_CLASS_BATTERY,
-                    "state_class": "measurement",
-                    "unit_of_measurement": PERCENTAGE
-                },
-                MK_RESOURCES: {"battery": ("8.0.2001", "_attr_native_value")},
-            }
-        }, {
             "sensor": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "temperature",
