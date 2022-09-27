@@ -54,6 +54,10 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
             return int(res_value)
         if res_name == "energy":
             return round(float(res_value) / 1000.0, 3)
+        if res_name == "temperature":
+            return round(float(res_value) / 100.0, 1)
+        if res_name == "humidity":
+            return round(int(res_value) / 100.0,1)
         return super().convert_res_to_attr(res_name, res_value)
 
 
@@ -100,9 +104,6 @@ class AiotActionSensor(AiotSensorEntity, SensorEntity):
         return data
 
     def convert_res_to_attr(self, res_name, res_value):
-
-        if res_name == "chip_temperature":
-            return round(float(res_value), 1)
         if res_name == "fw_ver":
             return res_value
         if res_name == "lqi":

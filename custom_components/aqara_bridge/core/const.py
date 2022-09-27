@@ -37,13 +37,11 @@ OPT_DEBUG = {
     'msg': "msg logs"
 }
 
-ATTR_CHIP_TEMPERATURE = "chip_temperature"
 ATTR_FW_VER = "fw_ver"
 ATTR_LQI = "lqi"
 ATTR_VOLTAGE = "voltage"
 
 PROP_TO_ATTR_BASE = {
-    "chip_temperature": ATTR_CHIP_TEMPERATURE,
     "fw_ver": ATTR_FW_VER,
     "lqi": ATTR_LQI,
     "voltage": ATTR_VOLTAGE

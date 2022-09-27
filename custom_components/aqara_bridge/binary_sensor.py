@@ -40,8 +40,6 @@ class AiotBinarySensorEntity(AiotEntityBase, BinarySensorEntity):
         self._attr_name = f"{self._attr_name} {self._attr_device_class}"
 
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name == "chip_temperature":
-            return round(float(res_value), 1)
         if res_name == "fw_ver":
             return res_value
         if res_name == "lqi":
@@ -94,8 +92,6 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         })
 
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name == "chip_temperature":
-            return format((int(res_value) - 32) * 5 / 9, '.2f')
         if res_name == "fw_ver":
             return res_value
         if res_name == "lqi":
@@ -141,8 +137,6 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
 
 class AiotDoorBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name == "chip_temperature":
-            return round(float(res_value), 1)
         if res_name == "fw_ver":
             return res_value
         if res_name == "lqi":

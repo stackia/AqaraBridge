@@ -54,7 +54,6 @@ class AiotEntityBase(Entity):
     _aiot_manager = None
 
     _attr_lqi = None
-    _attr_chip_temperature = None
     _attr_voltage = None
     _attr_fw_ver = None
 
@@ -113,11 +112,6 @@ class AiotEntityBase(Entity):
         return self._attr_lqi
 
     @property
-    def chip_temperature(self):
-        """Return the chip temperature."""
-        return self._attr_chip_temperature
-
-    @property
     def voltage(self):
         """Return battery voltage."""
         return self._attr_voltage
@@ -128,6 +122,8 @@ class AiotEntityBase(Entity):
         return self._attr_fw_ver
 
     def get_res_id_by_name(self, res_name):
+        # if self._channel and res_name == "disable_btn":
+        #     return self._res_params[res_name][0].format(self._channel -1)
         return self._res_params[res_name][0].format(self._channel)
 
     async def async_set_res_value(self, res_name, value):
