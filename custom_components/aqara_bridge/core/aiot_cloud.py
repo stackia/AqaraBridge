@@ -131,7 +131,7 @@ class AiotCloud:
                             )
                         else:
                             # Aiot令牌更新失败，请重新授权
-                            _LOGGER.warning("Aiot token refresh failed, please do authorization again！")
+                            _LOGGER.error("Aiot token refresh failed, please do authorization again！")
                 return jo.get("result")
             else:
                 return jo
@@ -180,7 +180,8 @@ class AiotCloud:
             self.refresh_token = jo["result"]["refreshToken"]
             if self.update_token_event_callback:
                 self.update_token_event_callback(self.access_token, self.refresh_token)
-
+        else:
+            _LOGGER.error(f"Call Aiot api refresh token failed，request:{refresh_token},return:{jo}")
         return jo
 
     async def async_query_device_sub_info(self, did: str):

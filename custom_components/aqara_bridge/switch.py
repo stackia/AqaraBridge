@@ -72,8 +72,6 @@ class AiotSwitchEntity(AiotToggleableEntityBase, SwitchEntity):
             return res_value == "1"
         if res_name == "energy":
             return round(float(res_value) / 1000.0, 3)
-        if res_name == "chip_temperature":
-            return round(float(res_value), 1)
         if res_name == "fw_ver":
             return res_value
         if res_name == "lqi":

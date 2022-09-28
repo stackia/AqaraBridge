@@ -1,62 +1,9 @@
-from homeassistant.components.climate import TEMP_CELSIUS
-from homeassistant.components.light import (
-    SUPPORT_BRIGHTNESS,
-    SUPPORT_COLOR,
-    SUPPORT_COLOR_TEMP,
-)
-from homeassistant.components.cover import (
-    SUPPORT_CLOSE,
-    SUPPORT_OPEN,
-    SUPPORT_SET_POSITION,
-    SUPPORT_STOP,
-)
-from homeassistant.components.climate import (
-    SUPPORT_TARGET_TEMPERATURE,
-    SUPPORT_FAN_MODE,
-)
-from homeassistant.components.remote import SUPPORT_LEARN_COMMAND
-from homeassistant.components.binary_sensor import (
-    DEVICE_CLASS_DOOR,
-    DEVICE_CLASS_MOISTURE,
-    DEVICE_CLASS_MOTION
-)
-from homeassistant.const import (
-    # ATTR_BATTERY_LEVEL,
-    # ATTR_TEMPERATURE,
-    CONDUCTIVITY,
-    DEVICE_CLASS_BATTERY,
-    DEVICE_CLASS_ENERGY,
-    DEVICE_CLASS_HUMIDITY,
-    DEVICE_CLASS_ILLUMINANCE,
-    DEVICE_CLASS_POWER,
-    DEVICE_CLASS_PRESSURE,
-    DEVICE_CLASS_TEMPERATURE,
-    DEVICE_CLASS_CO2,
-    ENERGY_WATT_HOUR,
-    ENERGY_KILO_WATT_HOUR,
-    LIGHT_LUX,
-    PERCENTAGE,
-    POWER_WATT,
-    PRESSURE_HPA,
-    TEMP_CELSIUS,
-    CONCENTRATION_PARTS_PER_BILLION,
-    CONCENTRATION_PARTS_PER_MILLION,
-    STATE_OPEN,
-    STATE_OPENING,
-    # STATE_CLOSED,
-    STATE_CLOSING,
-    STATE_LOCKED,
-    STATE_UNLOCKED
-    )
-
-try:
-    from homeassistant.const import DEVICE_CLASS_GAS
-except:
-    DEVICE_CLASS_GAS = "gas"
-try:
-    from homeassistant.const import DEVICE_CLASS_VOLATILE_ORGANIC_COMPOUNDS
-except:
-    DEVICE_CLASS_VOLATILE_ORGANIC_COMPOUNDS = "volatile_organic_compounds"
+from homeassistant.components.light import *
+from homeassistant.components.cover import *
+from homeassistant.components.climate import *
+from homeassistant.components.remote import *
+from homeassistant.components.binary_sensor import *
+from homeassistant.const import *
 
 # AiotDevice Mapping
 MK_MAPPING_PARAMS = "mapping_params"
@@ -342,7 +289,7 @@ AIOT_DEVICE_MAPPING = [{
         }
     ]
 }, {
-    # 水浸传感器，默认未知？
+    # 水浸传感器
     'lumi.sensor_wleak.aq1': ["Aqara", "Water Leak Sensor", "SJCGQ11LM"],
     'lumi.flood.agl02': ["Aqara", "Water Leak Sensor T1", "SJCGQ12LM"],
     'lumi.flood.acn001': ["Aqara", "Water Leak Sensor E1", "SJCGQ13LM"],
@@ -354,7 +301,7 @@ AIOT_DEVICE_MAPPING = [{
                     "device_class": DEVICE_CLASS_MOISTURE
                 },
                 MK_RESOURCES: {
-                    "moisture": ("3.1.85", "_attr_native_value"),
+                    "moisture": ("3.1.85", "_attr_is_on"),
                     "lqi": ("8.0.2007", "_attr_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
                 },
@@ -362,16 +309,17 @@ AIOT_DEVICE_MAPPING = [{
         }
     ]
 }, {
-    # Xiaomi 烟雾报警器无法获取数据？
+    # Xiaomi 烟雾报警器
     'lumi.sensor_smoke.v1': ["Xiaomi", "Smoke Sensor", "JTYJ-GD-01LM/BW"],
     'params': [
         {
             "binary_sensor": {
                 MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "smoke"
+                    MK_HASS_NAME: "smoke",
+                    "device_class": DEVICE_CLASS_SMOKE
                 },
                 MK_RESOURCES: {
-                    "smoke": ("13.1.85", "_attr_native_value")
+                    "smoke": ("13.1.85", "_attr_is_on")
                 },
             }
         }, 

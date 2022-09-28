@@ -46,7 +46,16 @@ class AiotBinarySensorEntity(AiotEntityBase, BinarySensorEntity):
             return int(res_value)
         if res_name == "voltage":
             return format(float(res_value) / 1000, '.3f')
+        if res_name in ["moisture", "smoke"]:
+            return int(res_value) != 0
         return super().convert_res_to_attr(res_name, res_value)
+
+    @property
+    def is_on(self):
+        """Return true if the binary sensor is on."""
+        if self.device_class in ["moisture", "smoke"] and self._attr_is_on is None:
+            return False
+        return self._attr_is_on
 
     @property
     def extra_state_attributes(self):
