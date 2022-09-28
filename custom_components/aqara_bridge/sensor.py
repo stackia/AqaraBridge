@@ -19,16 +19,19 @@ TYPE = "sensor"
 
 DATA_KEY = f"{TYPE}.{DOMAIN}"
 
+# 魔方
 ATTR_ROTATE_ANGLE = "rotate_angle"
 ATTR_ACTION_DURATION = "action_duration"
 ATTR_ROTATE_ANGLE_W_HOLD = "rotate_angle_w_hold"
 ATTR_ACTION_DURATION_W_HOLD = "action_duration_w_hold"
 
+# 无线开关：单击、双击、长按
+
 PROP_TO_ATTR = {
     "rotate_angle": ATTR_ROTATE_ANGLE,
     "action_duration": ATTR_ACTION_DURATION,
     "rotate_angle_w_hold": ATTR_ROTATE_ANGLE_W_HOLD,
-    "action_duration_w_hold": ATTR_ACTION_DURATION_W_HOLD
+    "action_duration_w_hold": ATTR_ACTION_DURATION_W_HOLD,
 }
 
 
@@ -48,6 +51,7 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
         AiotEntityBase.__init__(self, hass, device, res_params, TYPE, channel, **kwargs)
         self._attr_state_class = kwargs.get("state_class")
         self._attr_name = f"{self._attr_name} {self._attr_device_class}"
+        self._attr_native_unit_of_measurement = kwargs.get("unit_of_measurement")
 
     def convert_res_to_attr(self, res_name, res_value):
         if res_name == "battry":
@@ -55,13 +59,18 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
         if res_name == "energy":
             return round(float(res_value) / 1000.0, 3)
         if res_name == "temperature":
-            return round(float(res_value) / 100.0, 1)
+            return round(int(res_value) / 100.0, 1)
         if res_name == "humidity":
             return round(int(res_value) / 100.0,1)
         return super().convert_res_to_attr(res_name, res_value)
 
 
 class AiotActionSensor(AiotSensorEntity, SensorEntity):
+    _attr_rotate_angle = None
+    _attr_action_duration = None
+    _attr_rotate_angle_w_hold = None
+    _attr_action_duration_w_hold = None
+
     @property
     def icon(self):
         return 'mdi:bell'

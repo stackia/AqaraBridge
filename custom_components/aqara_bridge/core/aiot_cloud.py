@@ -118,10 +118,10 @@ class AiotCloud:
                 # 这里的异常处理需要优化
                 if jo["code"] != 0:
                     # 调用Aiot api失败，返回值
-                    _LOGGER.warn(f"Call Aiot api failed，return：{jo}")
+                    _LOGGER.warning(f"Call Aiot api failed，request:{payload},return:{jo}")
                     if jo["code"] == 108:
                         # 令牌过期或异常，正在尝试自动刷新
-                        _LOGGER.warn(f"Aiot token expired, trying to auto refresh！")
+                        _LOGGER.warning(f"Aiot token expired, trying to auto refresh！")
                         new_jo = await self.async_refresh_token(self.refresh_token)
                         if new_jo["code"] == 0:
                             # Aiot令牌更新成功！
@@ -131,7 +131,7 @@ class AiotCloud:
                             )
                         else:
                             # Aiot令牌更新失败，请重新授权
-                            _LOGGER.warn("Aiot token refresh failed, please do authorization again！")
+                            _LOGGER.warning("Aiot token refresh failed, please do authorization again！")
                 return jo.get("result")
             else:
                 return jo
