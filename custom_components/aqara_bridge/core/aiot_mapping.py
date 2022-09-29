@@ -146,54 +146,56 @@ AIOT_DEVICE_MAPPING = [{
             }
         }
     ]
-},{
-    # 无线开关（贴墙式单键版）
-    'lumi.remote.b186acn01': ["Aqara", "Single Wall Button", "WXKG03LM"],
-    # 无线开关H1（贴墙式单键版）
-    'lumi.remote.b18ac1': ["Aqara", "Wireless Remote Switch H1 (Single Rocker)", "WXKG14LM"],
-    # 无线开关E1（贴墙式单键版）
-    'lumi.remote.acn004': ["Aqara", "Wireless Remote Switch E1 (Single Rocker)", "WXKG16LM"],
-    # 无线开关D1（贴墙式单键版）
-    'lumi.remote.b186acn02': ["Aqara", "Wireless Remote Switch D1 (Single Rocker)", "WXKG06LM"],
-    # 无线开关E1 mini
-    'lumi.remote.acn007': ["Aqara", "Single Wall Button E1", "WXKG16LM"],
-    'params': [
-        {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "action",
-                    "device_class": "",
-                    "state_class": "",
-                    "unit_of_measurement": ""
-                },
-                MK_RESOURCES: {"button": ("13.1.85", "_attr_native_value")},
-            }
-        }
-    ]
-}, {
-    # 无线开关（贴墙式双键版）
-    'lumi.remote.b286acn01': ["Aqara", "Double Wall Button", "WXKG02LM"],
-    # 无线开关H1（贴墙式双键版）
-    'lumi.remote.b28ac1': ["Aqara", "Wireless Remote Switch H1 (Double Rocker)", "WXKG15LM"],
-    # 无线开关E1（贴墙式双键版）
-    'lumi.remote.acn004': ["Aqara", "Wireless Remote Switch E1 (Double Rocker)", "WXKG17LM"],
-    # 无线开关D1（贴墙式双键版）
-    'lumi.remote.b286acn02': ["Aqara", "Wireless Remote Switch D1 (Double Rocker)", "WXKG07LM"],
-    'params': [
-        {
-            "sensor": {
-                MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "action",
-                    "device_class": "",
-                    "state_class": "",
-                    "unit_of_measurement": ""
-                },
-                MK_RESOURCES: {"button": ("13.{}.85", "_attr_native_value")},
-                MK_MAPPING_PARAMS: {"ch_count": 2},
-            }
-        }
-    ]
-}, 
+},
+# 无意义，无法获取更新以及订阅只能通过轮训。无法作为触发使用。
+# {
+#     # 无线开关（贴墙式单键版）
+#     'lumi.remote.b186acn01': ["Aqara", "Single Wall Button", "WXKG03LM"],
+#     # 无线开关H1（贴墙式单键版）
+#     'lumi.remote.b18ac1': ["Aqara", "Wireless Remote Switch H1 (Single Rocker)", "WXKG14LM"],
+#     # 无线开关E1（贴墙式单键版）
+#     'lumi.remote.acn004': ["Aqara", "Wireless Remote Switch E1 (Single Rocker)", "WXKG16LM"],
+#     # 无线开关D1（贴墙式单键版）
+#     'lumi.remote.b186acn02': ["Aqara", "Wireless Remote Switch D1 (Single Rocker)", "WXKG06LM"],
+#     # 无线开关E1 mini
+#     'lumi.remote.acn007': ["Aqara", "Single Wall Button E1", "WXKG16LM"],
+#     'params': [
+#         {
+#             "sensor": {
+#                 MK_INIT_PARAMS: {
+#                     MK_HASS_NAME: "action",
+#                     "device_class": "",
+#                     "state_class": "",
+#                     "unit_of_measurement": ""
+#                 },
+#                 MK_RESOURCES: {"button": ("13.1.85", "_attr_native_value")},
+#             }
+#         }
+#     ]
+# }, {
+#     # 无线开关（贴墙式双键版）
+#     'lumi.remote.b286acn01': ["Aqara", "Double Wall Button", "WXKG02LM"],
+#     # 无线开关H1（贴墙式双键版）
+#     'lumi.remote.b28ac1': ["Aqara", "Wireless Remote Switch H1 (Double Rocker)", "WXKG15LM"],
+#     # 无线开关E1（贴墙式双键版）
+#     'lumi.remote.acn004': ["Aqara", "Wireless Remote Switch E1 (Double Rocker)", "WXKG17LM"],
+#     # 无线开关D1（贴墙式双键版）
+#     'lumi.remote.b286acn02': ["Aqara", "Wireless Remote Switch D1 (Double Rocker)", "WXKG07LM"],
+#     'params': [
+#         {
+#             "sensor": {
+#                 MK_INIT_PARAMS: {
+#                     MK_HASS_NAME: "action",
+#                     "device_class": "",
+#                     "state_class": "",
+#                     "unit_of_measurement": ""
+#                 },
+#                 MK_RESOURCES: {"button": ("13.{}.85", "_attr_native_value")},
+#                 MK_MAPPING_PARAMS: {"ch_count": 2},
+#             }
+#         }
+#     ]
+# }, 
 {
     # 小米温湿度传感器
     'lumi.sensor_ht.v1': ["Xiaomi", "TH Sensor", "WSDCGQ01LM"],

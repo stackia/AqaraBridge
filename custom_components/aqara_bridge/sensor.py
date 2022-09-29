@@ -19,21 +19,6 @@ TYPE = "sensor"
 
 DATA_KEY = f"{TYPE}.{DOMAIN}"
 
-# 魔方
-ATTR_ROTATE_ANGLE = "rotate_angle"
-ATTR_ACTION_DURATION = "action_duration"
-ATTR_ROTATE_ANGLE_W_HOLD = "rotate_angle_w_hold"
-ATTR_ACTION_DURATION_W_HOLD = "action_duration_w_hold"
-
-# 无线开关：单击、双击、长按
-
-PROP_TO_ATTR = {
-    "rotate_angle": ATTR_ROTATE_ANGLE,
-    "action_duration": ATTR_ACTION_DURATION,
-    "rotate_angle_w_hold": ATTR_ROTATE_ANGLE_W_HOLD,
-    "action_duration_w_hold": ATTR_ACTION_DURATION_W_HOLD,
-}
-
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
@@ -65,35 +50,12 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
         return super().convert_res_to_attr(res_name, res_value)
 
 
-class AiotActionSensor(AiotSensorEntity, SensorEntity):
-    _attr_rotate_angle = None
-    _attr_action_duration = None
-    _attr_rotate_angle_w_hold = None
-    _attr_action_duration_w_hold = None
 
+
+class AiotActionSensor(AiotSensorEntity, SensorEntity):
     @property
     def icon(self):
         return 'mdi:bell'
-
-    @property
-    def rotate_angle(self):
-        """Return the rotate angle."""
-        return self._attr_rotate_angle
-
-    @property
-    def action_duration(self):
-        """Return the action duration."""
-        return self._attr_action_duration
-
-    @property
-    def rotate_angle_w_hold(self):
-        """Return the rotate angle with hold"""
-        return self._attr_rotate_angle_w_hold
-
-    @property
-    def action_duration_w_hold(self):
-        """Return the action duration with hold."""
-        return self._attr_action_duration_w_hold
 
     @property
     def extra_state_attributes(self):
@@ -105,11 +67,6 @@ class AiotActionSensor(AiotSensorEntity, SensorEntity):
             if value is not None:
                 data[attr] = value
 
-        for prop, attr in PROP_TO_ATTR.items():
-            value = getattr(self, prop)
-            if value is not None:
-                data[attr] = value
-
         return data
 
     def convert_res_to_attr(self, res_name, res_value):
@@ -117,26 +74,11 @@ class AiotActionSensor(AiotSensorEntity, SensorEntity):
             return res_value
         if res_name == "lqi":
             return int(res_value)
-        if res_name == "rotate_angle":
-            return res_value
-        if res_name == "action_duration":
-            return res_value
-        if res_name == "rotate_angle_w_hold":
-            return res_value
-        if res_name == "action_duration_w_hold":
-            return res_value
         if res_value != 0 and res_value != "" and res_name == "button":
             if res_name == 'vibration' and res_value != '2':
                 click_type = VIBRATION.get(res_value, 'unkown')
             if "button" in res_name:
                 click_type = BUTTON.get(res_value, 'unkown')
-            if "cube" in res_name:
-                click_type = CUBE.get(res_value, 'unkown')
-
-            # repeat event from Aqara integration
-            self.hass.bus.fire('xiaomi_aqara.click', {
-                'entity_id': self.entity_id, 'click_type': click_type
-            })
 
             self.schedule_update_ha_state()
             return click_type
