@@ -6,7 +6,7 @@ from typing import Optional, Union
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity import DeviceInfo, Entity
-from rocketmq.client import PushConsumer, RecvMessage
+
 
 from .aiot_cloud import AiotCloud, APP_ID, KEY_ID, APP_KEY
 from .aiot_mapping import (
@@ -18,9 +18,27 @@ from .aiot_mapping import (
 )
 from .const import DOMAIN, HASS_DATA_AIOT_MANAGER, CONF_DEBUG
 
-
 _LOGGER = logging.getLogger(__name__)
 
+
+def __init_rocketmq():
+    import platform, os
+    if platform.system() != "Linux":
+        return
+    if platform.machine() != "x86_64":
+        return
+    target_p = "/usr/local/lib/librocketmq.so"
+    if not os.path.exists(target_p):
+        import shutil
+        from_p = "%s/custom_componetns/aqara_bridge/3rd_libs/x86_64/librocketmq.so" % os.path.abspath('.')
+        _LOGGER.warning(f"Copy librocketmq from %s to %s" % (from_p, target_p))
+        shutil.copyfile(from_p, )
+
+try:
+    from rocketmq.client import PushConsumer, RecvMessage
+except:
+    __init_rocketmq()
+    from rocketmq.client import PushConsumer, RecvMessage
 
 class AiotDevice:
     def __init__(self, **kwargs):

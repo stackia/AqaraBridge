@@ -57,21 +57,7 @@ class AiotCloud:
         self.session = session
         self.options = None
         self.set_country("CN")
-        self.__init_rocketmq()
-
-    def __init_rocketmq(self):
-        import platform, os
-        if platform.system() != "Linux":
-            return
-        if platform.machine() != "x86_64":
-            return
-        target_p = "/usr/local/lib/librocketmq.so"
-        if not os.path.exists(target_p):
-            import shutil
-            from_p = "%s/custom_componetns/aqara_bridge/3rd_libs/x86_64/librocketmq.so" % os.path.abspath('.')
-            _LOGGER.warning(f"Copy librocketmq from %s to %s" % (from_p, target_p))
-            shutil.copyfile(from_p, )
-
+ 
     def set_options(self, options):
         """ set hass options """
         self.options = options
