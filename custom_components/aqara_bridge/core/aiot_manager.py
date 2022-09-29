@@ -32,7 +32,7 @@ def __init_rocketmq():
         import shutil
         from_p = "%s/custom_componetns/aqara_bridge/3rd_libs/x86_64/librocketmq.so" % os.path.abspath('.')
         _LOGGER.warning(f"Copy librocketmq from %s to %s" % (from_p, target_p))
-        shutil.copyfile(from_p, )
+        shutil.copyfile(from_p, target_p)
 
 try:
     from rocketmq.client import PushConsumer, RecvMessage
