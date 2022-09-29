@@ -30,7 +30,7 @@ def __init_rocketmq():
     target_p = "/usr/local/lib/librocketmq.so"
     if not os.path.exists(target_p):
         import shutil
-        from_p = "%s/custom_componetns/aqara_bridge/3rd_libs/x86_64/librocketmq.so" % os.path.abspath('.')
+        from_p = "%s/custom_components/aqara_bridge/3rd_libs/x86_64/librocketmq.so" % os.path.abspath('.')
         _LOGGER.warning(f"Copy librocketmq from %s to %s" % (from_p, target_p))
         shutil.copyfile(from_p, target_p)
 
