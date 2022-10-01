@@ -21,6 +21,10 @@ APP_ID = "88110776288481280040ace0"
 KEY_ID = "K.881107763014836224"
 APP_KEY = "t7g6qhx4nmbeqmfq1w6yksucnbrofsgs"
 
+_DEBUG_ACCESSTOKEN = ""
+_DEBUG_REFRESHTOEEN = ""
+_DEBUG_STATUS = False
+
 
 def get_random_string(length: int):
     seq = string.ascii_uppercase + string.digits
@@ -46,7 +50,7 @@ def gen_sign(
 
 
 class AiotCloud:
-    access_token = None
+    access_token_ = None
     refresh_token = None
     update_token_event_callback = None
 
@@ -57,7 +61,7 @@ class AiotCloud:
         self.session = session
         self.options = None
         self.set_country("CN")
- 
+
     def set_options(self, options):
         """ set hass options """
         self.options = options
@@ -74,6 +78,12 @@ class AiotCloud:
     def _get_request_headers(self):
         """生成Headers"""
         nonce = get_random_string(16)
+        if _DEBUG_STATUS:
+            if _DEBUG_ACCESSTOKEN is not None:
+                self.access_token = _DEBUG_ACCESSTOKEN
+            if _DEBUG_REFRESHTOEEN is not None:
+                self.refresh_token = _DEBUG_REFRESHTOEEN   
+        
         timestamp = str(int(round(time.time() * 1000)))
         sign = gen_sign(
             self.access_token, self.app_id, self.key_id, nonce, timestamp, self.app_key
@@ -184,7 +194,7 @@ class AiotCloud:
             _LOGGER.error(f"Call Aiot api refresh token failed，request:{refresh_token},return:{jo}")
         return jo
 
-    async def async_query_device_sub_info(self, did: str):
+    async def async_query_device_bind_key(self, did: str):
         """获取设备入网bindKey"""
         return await self._async_invoke_aqara_cloud_api(
             intent="query.device.bindKey", did=did

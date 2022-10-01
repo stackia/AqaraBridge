@@ -72,9 +72,9 @@ class AiotSwitchEntity(AiotToggleableEntityBase, SwitchEntity):
             return res_value == "1"
         if res_name == "energy":
             return round(float(res_value) / 1000.0, 3)
-        if res_name == "fw_ver":
+        if res_name == "firmware_version":
             return res_value
-        if res_name == "lqi":
+        if res_name == "zigbee_lqi":
             return int(res_value)
         if res_name == "in_use":
             return res_value == "1"

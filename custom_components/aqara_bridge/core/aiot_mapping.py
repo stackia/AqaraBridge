@@ -65,7 +65,7 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {
                     "toggle": ("4.1.85", "_attr_is_on"),
-                    "lqi": ("8.0.2007", "_attr_lqi"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "disable_btn":("4.10.85","_attr_disable_btn"),
                 }
             }
@@ -82,7 +82,7 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {
                     "toggle": ("4.{}.85", "_attr_is_on"),
-                    "lqi": ("8.0.2007", "_attr_lqi"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     # "disable_btn":("4.1{}.85","_attr_disable_btn"), 对应不上无法处理数据，async_set_attr，get_res_id_by_name
                 },
                 MK_MAPPING_PARAMS: {"ch_count": 2},
@@ -100,7 +100,7 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {
                     "toggle": ("4.{}.85", "_attr_is_on"),
-                    "lqi": ("8.0.2007", "_attr_lqi"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     # "disable_btn":("4.1{}.85","_attr_disable_btn"), 对应不上无法处理数据，async_set_attr，get_res_id_by_name
                 },
                 MK_MAPPING_PARAMS: {"ch_count": 3},
@@ -122,7 +122,7 @@ AIOT_DEVICE_MAPPING = [{
                     "toggle": ("4.1.85", "_attr_is_on"),
                     "power": ("0.12.85", "_attr_current_power_w"),
                     "energy": ("0.13.85", "_attr_today_energy_kwh"),
-                    "lqi": ("8.0.2007", "_attr_lqi"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     # "in_use": ("8.0.2044", "_attr_in_use")#使用状态有问题这个参数不存在，需要修改
                 }
             }
@@ -148,54 +148,54 @@ AIOT_DEVICE_MAPPING = [{
     ]
 },
 # 无意义，无法获取更新以及订阅只能通过轮训。无法作为触发使用。
-# {
-#     # 无线开关（贴墙式单键版）
-#     'lumi.remote.b186acn01': ["Aqara", "Single Wall Button", "WXKG03LM"],
-#     # 无线开关H1（贴墙式单键版）
-#     'lumi.remote.b18ac1': ["Aqara", "Wireless Remote Switch H1 (Single Rocker)", "WXKG14LM"],
-#     # 无线开关E1（贴墙式单键版）
-#     'lumi.remote.acn004': ["Aqara", "Wireless Remote Switch E1 (Single Rocker)", "WXKG16LM"],
-#     # 无线开关D1（贴墙式单键版）
-#     'lumi.remote.b186acn02': ["Aqara", "Wireless Remote Switch D1 (Single Rocker)", "WXKG06LM"],
-#     # 无线开关E1 mini
-#     'lumi.remote.acn007': ["Aqara", "Single Wall Button E1", "WXKG16LM"],
-#     'params': [
-#         {
-#             "sensor": {
-#                 MK_INIT_PARAMS: {
-#                     MK_HASS_NAME: "action",
-#                     "device_class": "",
-#                     "state_class": "",
-#                     "unit_of_measurement": ""
-#                 },
-#                 MK_RESOURCES: {"button": ("13.1.85", "_attr_native_value")},
-#             }
-#         }
-#     ]
-# }, {
-#     # 无线开关（贴墙式双键版）
-#     'lumi.remote.b286acn01': ["Aqara", "Double Wall Button", "WXKG02LM"],
-#     # 无线开关H1（贴墙式双键版）
-#     'lumi.remote.b28ac1': ["Aqara", "Wireless Remote Switch H1 (Double Rocker)", "WXKG15LM"],
-#     # 无线开关E1（贴墙式双键版）
-#     'lumi.remote.acn004': ["Aqara", "Wireless Remote Switch E1 (Double Rocker)", "WXKG17LM"],
-#     # 无线开关D1（贴墙式双键版）
-#     'lumi.remote.b286acn02': ["Aqara", "Wireless Remote Switch D1 (Double Rocker)", "WXKG07LM"],
-#     'params': [
-#         {
-#             "sensor": {
-#                 MK_INIT_PARAMS: {
-#                     MK_HASS_NAME: "action",
-#                     "device_class": "",
-#                     "state_class": "",
-#                     "unit_of_measurement": ""
-#                 },
-#                 MK_RESOURCES: {"button": ("13.{}.85", "_attr_native_value")},
-#                 MK_MAPPING_PARAMS: {"ch_count": 2},
-#             }
-#         }
-#     ]
-# }, 
+{
+    # 无线开关（贴墙式单键版）
+    'lumi.remote.b186acn01': ["Aqara", "Single Wall Button", "WXKG03LM"],
+    # 无线开关H1（贴墙式单键版）
+    'lumi.remote.b18ac1': ["Aqara", "Wireless Remote Switch H1 (Single Rocker)", "WXKG14LM"],
+    # 无线开关E1（贴墙式单键版）
+    'lumi.remote.acn004': ["Aqara", "Wireless Remote Switch E1 (Single Rocker)", "WXKG16LM"],
+    # 无线开关D1（贴墙式单键版）
+    'lumi.remote.b186acn02': ["Aqara", "Wireless Remote Switch D1 (Single Rocker)", "WXKG06LM"],
+    # 无线开关E1 mini
+    'lumi.remote.acn007': ["Aqara", "Single Wall Button E1", "WXKG16LM"],
+    'params': [
+        {
+            "sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "action",
+                    "device_class": "",
+                    "state_class": "",
+                    "unit_of_measurement": ""
+                },
+                MK_RESOURCES: {"button": ("13.1.85", "_attr_native_value")},
+            }
+        }
+    ]
+}, {
+    # 无线开关（贴墙式双键版）
+    'lumi.remote.b286acn01': ["Aqara", "Double Wall Button", "WXKG02LM"],
+    # 无线开关H1（贴墙式双键版）
+    'lumi.remote.b28ac1': ["Aqara", "Wireless Remote Switch H1 (Double Rocker)", "WXKG15LM"],
+    # 无线开关E1（贴墙式双键版）
+    'lumi.remote.acn004': ["Aqara", "Wireless Remote Switch E1 (Double Rocker)", "WXKG17LM"],
+    # 无线开关D1（贴墙式双键版）
+    'lumi.remote.b286acn02': ["Aqara", "Wireless Remote Switch D1 (Double Rocker)", "WXKG07LM"],
+    'params': [
+        {
+            "sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "action",
+                    "device_class": "",
+                    "state_class": "",
+                    "unit_of_measurement": ""
+                },
+                MK_RESOURCES: {"button": ("13.{}.85", "_attr_native_value")},
+                MK_MAPPING_PARAMS: {"ch_count": 2},
+            }
+        }
+    ]
+}, 
 {
     # 小米温湿度传感器
     'lumi.sensor_ht.v1': ["Xiaomi", "TH Sensor", "WSDCGQ01LM"],
@@ -241,7 +241,7 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {
                     "motion": ("3.1.85", "_attr_native_value"),
-                    "lqi": ("8.0.2007", "_attr_lqi"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
                 },
             }
@@ -259,7 +259,7 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {
                     "motion": ("3.51.85", "_attr_native_value"),
-                    "lqi": ("8.0.2007", "_attr_lqi")
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi")
                 },
             }
         }
@@ -284,7 +284,7 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {
                     "status": ("3.1.85", "_attr_native_value"),
-                    "lqi": ("8.0.2007", "_attr_lqi"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
                 },
             }
@@ -304,7 +304,7 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {
                     "moisture": ("3.1.85", "_attr_is_on"),
-                    "lqi": ("8.0.2007", "_attr_lqi"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
                 },
             }

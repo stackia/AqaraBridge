@@ -1,5 +1,7 @@
 import time
+from datetime import datetime
 from homeassistant.components.sensor import SensorEntity
+from .core.utils import local_zone
 
 from .core.aiot_manager import (
     AiotManager,
@@ -37,6 +39,26 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
         self._attr_state_class = kwargs.get("state_class")
         self._attr_name = f"{self._attr_name} {self._attr_device_class}"
         self._attr_native_unit_of_measurement = kwargs.get("unit_of_measurement")
+        
+        tim = round(int(time.time()), 0)
+        self._attr_last_update_time = tim
+        self._attr_last_update_at = datetime.fromtimestamp(tim, local_zone())
+        self._extra_state_attributes.extend(["last_update_time", "last_update_at"])
+
+    @property
+    def last_update_time(self):
+        self._refresh_data()
+        return self._attr_last_update_time
+
+    @property
+    def last_update_at(self):
+        self._refresh_data()
+        return self._attr_last_update_at
+
+    def _refresh_data(self):
+        if self.trigger_time is not None:
+            self._attr_last_update_time = self.trigger_time
+            self._attr_last_update_at = datetime.fromtimestamp(self.trigger_time, local_zone())
 
     def convert_res_to_attr(self, res_name, res_value):
         if res_name == "battry":
@@ -57,22 +79,10 @@ class AiotActionSensor(AiotSensorEntity, SensorEntity):
     def icon(self):
         return 'mdi:bell'
 
-    @property
-    def extra_state_attributes(self):
-        """Return the optional state attributes."""
-        data = {}
-
-        for prop, attr in PROP_TO_ATTR_BASE.items():
-            value = getattr(self, prop)
-            if value is not None:
-                data[attr] = value
-
-        return data
-
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name == "fw_ver":
+        if res_name == "firmware_version":
             return res_value
-        if res_name == "lqi":
+        if res_name == "zigbee_lqi":
             return int(res_value)
         if res_value != 0 and res_value != "" and res_name == "button":
             if res_name == 'vibration' and res_value != '2':

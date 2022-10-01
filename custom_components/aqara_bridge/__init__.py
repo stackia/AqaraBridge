@@ -17,7 +17,6 @@ from .core.utils import AqaraBridgeDebug
 
 _LOGGER = logging.getLogger(__name__)
 
-
 def data_masking(s: str, n: int) -> str:
     return re.sub(f"(?<=.{{{n}}}).(?=.{{{n}}})", "*", str(s))
 

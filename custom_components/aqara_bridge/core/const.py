@@ -37,13 +37,14 @@ OPT_DEBUG = {
     'msg': "msg logs"
 }
 
-ATTR_FW_VER = "fw_ver"
-ATTR_LQI = "lqi"
+ATTR_FIRMWARE_VERSION = "firmware_version"
+ATTR_ZIGBEE_LQI = "zigbee_lqi"
 ATTR_VOLTAGE = "voltage"
 
+
 PROP_TO_ATTR_BASE = {
-    "fw_ver": ATTR_FW_VER,
-    "lqi": ATTR_LQI,
+    "firmware_version": ATTR_FIRMWARE_VERSION,
+    "zigbee_lqi": ATTR_ZIGBEE_LQI,
     "voltage": ATTR_VOLTAGE
 }
 

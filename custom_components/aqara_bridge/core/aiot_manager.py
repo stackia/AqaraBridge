@@ -1,7 +1,9 @@
 import asyncio
 import json
 import logging
+
 from typing import Optional, Union
+from datetime import datetime
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -17,6 +19,7 @@ from .aiot_mapping import (
     AIOT_DEVICE_MAPPING,
 )
 from .const import DOMAIN, HASS_DATA_AIOT_MANAGER, CONF_DEBUG
+from .utils import local_zone
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,29 +68,31 @@ class AiotDevice:
 
 
 class AiotEntityBase(Entity):
-    _channel = None
-    _device = None
-    _res_params = None
-    _supported_resources = None
-    _aiot_manager = None
-
-    _attr_lqi = None
-    _attr_voltage = None
-    _attr_fw_ver = None
-
     def __init__(self, hass, device, res_params, type_name, channel=None, **kwargs):
+         # 设备信息
         self._device = device
+        # 参数
         self._res_params = res_params
         self._supported_resources = []
         [
             self._supported_resources.append(v[0].format(channel))
             for k, v in res_params.items()
         ]
+        # 按键通道数量
         self._channel = channel
 
         self.hass = hass
         self._attr_name = device.device_name
         self._attr_should_poll = False
+        self._attr_firmware_version = device.firmware_version
+        # Zigbee信号强度
+        self._attr_zigbee_lqi = None
+        # 电压
+        self._attr_voltage = None
+        # battery_level、home_room、no_motion_seconds、
+        # 数据更新触发时间，仅限来自mq消息获取到触发信息时间
+        self._trigger_time = None
+
         self._attr_unique_id = (
             f"{DOMAIN}.{type_name}_0x{device.did.split('.', 1)[1]}_{kwargs.get('hass_attr_name')}"
         )
@@ -107,6 +112,7 @@ class AiotEntityBase(Entity):
         self._attr_device_class = kwargs.get("device_class")
 
         self._aiot_manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
+        self._extra_state_attributes = []
 
     def debug(self, message: str):
         """ deubug function """
@@ -125,9 +131,9 @@ class AiotEntityBase(Entity):
         return self._device
 
     @property
-    def lqi(self):
+    def zigbee_lqi(self):
         """Return the signal strength of zigbee """
-        return self._attr_lqi
+        return self._attr_zigbee_lqi
 
     @property
     def voltage(self):
@@ -135,9 +141,25 @@ class AiotEntityBase(Entity):
         return self._attr_voltage
 
     @property
-    def fw_ver(self):
+    def firmware_version(self):
         """Return firmware version."""
-        return self._attr_fw_ver
+        return self._attr_firmware_version
+
+    @property
+    def trigger_time(self):
+        return self._trigger_time
+
+    @property
+    def extra_state_attributes(self):
+        """Return the optional state attributes."""
+        data = {}
+
+        for attr in self._extra_state_attributes:
+            value = getattr(self, attr)
+            if value is not None:
+                data[attr] = value
+
+        return data
 
     def get_res_id_by_name(self, res_name):
         # if self._channel and res_name == "disable_btn":
@@ -361,13 +383,17 @@ class AiotManager:
         """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
         if msg.get("msgType"):
             # 属性消息，resource_report
+            
             if 'msg' in self.debug_option:
                 self.debug("msgType {}".format(msg['data']))
             for x in msg["data"]:
+                if x['resourceId'] in ["13.1.85", "13.2.85"]:
+                    _LOGGER.info("msgType {}".format(msg['data']))
                 entities = self._devices_entities.get(x["subjectId"])
                 if entities:
                     for entity in entities:
                         if x["resourceId"] in entity.supported_resources:
+                            await entity.async_set_attr('trigger_time', round(int(x['time']) / 1000.0, 0))
                             await entity.async_set_attr(x["resourceId"], x["value"])
         elif msg.get("eventType"):
             if 'msg' in self.debug_option:
