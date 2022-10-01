@@ -161,14 +161,14 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.remote.acn007': ["Aqara", "Single Wall Button E1", "WXKG16LM"],
     'params': [
         {
-            "sensor": {
+            "button": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "action",
                     "device_class": "",
                     "state_class": "",
                     "unit_of_measurement": ""
                 },
-                MK_RESOURCES: {"button": ("13.1.85", "_attr_native_value")},
+                MK_RESOURCES: {"button": ("13.1.85", "_attr_press_type")},
             }
         }
     ]
@@ -183,14 +183,14 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.remote.b286acn02': ["Aqara", "Wireless Remote Switch D1 (Double Rocker)", "WXKG07LM"],
     'params': [
         {
-            "sensor": {
+            "button": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "action",
                     "device_class": "",
                     "state_class": "",
                     "unit_of_measurement": ""
                 },
-                MK_RESOURCES: {"button": ("13.{}.85", "_attr_native_value")},
+                MK_RESOURCES: {"button": ("13.{}.85", "_attr_press_type")},
                 MK_MAPPING_PARAMS: {"ch_count": 2},
             }
         }

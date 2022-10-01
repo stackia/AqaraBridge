@@ -3,7 +3,6 @@ import json
 import logging
 
 from typing import Optional, Union
-from datetime import datetime
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
@@ -166,6 +165,9 @@ class AiotEntityBase(Entity):
         #     return self._res_params[res_name][0].format(self._channel -1)
         return self._res_params[res_name][0].format(self._channel)
 
+    def set_trigger_time(self, trigger_time):
+        self._trigger_time = trigger_time
+
     async def async_set_res_value(self, res_name, value):
         """设置资源值"""
         res_id = self.get_res_id_by_name(res_name)
@@ -187,6 +189,21 @@ class AiotEntityBase(Entity):
             ]
         return await self._aiot_manager.session.async_query_resource_value(
             self.device.did, res_ids
+        )
+
+    async def async_fetch_resource_history(self, page_size=1, *args):
+        """page_size过大会请求异常，如果为了获取最后状态只用1就可以"""
+        res_ids = []
+        if len(args) > 0:
+            res_ids = args
+        else:
+            [
+                res_ids.append(self.get_res_id_by_name(k))
+                for k, v in self._res_params.items()
+            ]
+        
+        return await self._aiot_manager.session.async_query_resource_history(
+            self.device.did, res_ids,page_size=page_size
         )
 
     async def async_update(self):
@@ -392,8 +409,8 @@ class AiotManager:
                 entities = self._devices_entities.get(x["subjectId"])
                 if entities:
                     for entity in entities:
+                        entity.set_trigger_time(round(int(x['time']) / 1000.0, 0))
                         if x["resourceId"] in entity.supported_resources:
-                            await entity.async_set_attr('trigger_time', round(int(x['time']) / 1000.0, 0))
                             await entity.async_set_attr(x["resourceId"], x["value"])
         elif msg.get("eventType"):
             if 'msg' in self.debug_option:

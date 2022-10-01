@@ -25,7 +25,6 @@ _DEBUG_ACCESSTOKEN = ""
 _DEBUG_REFRESHTOEEN = ""
 _DEBUG_STATUS = False
 
-
 def get_random_string(length: int):
     seq = string.ascii_uppercase + string.digits
     return "".join((random.choice(seq) for _ in range(length)))
@@ -251,6 +250,18 @@ class AiotCloud:
         return await self._async_invoke_aqara_cloud_api(
             intent="query.resource.value",
             resources=[{"subjectId": subject_id, "resourceIds": resource_ids}],
+        )
+
+    async def async_query_resource_history(self, subject_id: str, resource_ids: list,
+        startTime=None, endTime=None, page_size: int = 30):
+        if endTime is None and startTime is None:
+            endTime = int(time.time() * 1000)
+            startTime = int(endTime - (7 * 24 * 3600 * 1000))
+        """查询资源历史信息"""
+        return await self._async_invoke_aqara_cloud_api(
+            intent="fetch.resource.history",
+            subjectId=subject_id, resourceIds=resource_ids,
+            startTime=startTime ,endTime=endTime, size=page_size
         )
 
     async def async_write_resource_device(
