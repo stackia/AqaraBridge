@@ -3,7 +3,7 @@ import json
 import logging
 
 from typing import Optional, Union
-
+from datetime import datetime
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity import DeviceInfo, Entity
@@ -25,16 +25,15 @@ _LOGGER = logging.getLogger(__name__)
 
 def __init_rocketmq():
     import platform, os
-    if platform.system() != "Linux":
-        return
-    if platform.machine() != "x86_64":
-        return
+    fp = "%s/custom_components/aqara_bridge/3rd_libs/%s/librocketmq.so" % (os.path.abspath('.'), platform.machine())
+    if platform.system() != "Linux" or not os.path.exists(fp):
+        _LOGGER.error(f"AqaraBridge need rocketmq, you need install it. Not Fund librocketmq from %s." % fp)
+        return 
     target_p = "/usr/local/lib/librocketmq.so"
     if not os.path.exists(target_p):
         import shutil
-        from_p = "%s/custom_components/aqara_bridge/3rd_libs/x86_64/librocketmq.so" % os.path.abspath('.')
-        _LOGGER.warning(f"Copy librocketmq from %s to %s" % (from_p, target_p))
-        shutil.copyfile(from_p, target_p)
+        _LOGGER.warning(f"Copy librocketmq from %s to %s" % (fp, target_p))
+        shutil.copyfile(fp, target_p)
 
 try:
     from rocketmq.client import PushConsumer, RecvMessage
@@ -54,17 +53,22 @@ class AiotDevice:
         self.firmware_version = kwargs.get("firmwareVersion")
         self.create_time = kwargs.get("createTime")
         self.update_time = kwargs.get("updateTime")
+        self.position_id = kwargs.get("positionId")
+        self.position_name = None
         self.platforms = None
+        self.manufacturer = None
+        self.heard_version = None
         for device in AIOT_DEVICE_MAPPING:
             if self.model in device:
                 self.platforms = device['params']
+                self.manufacturer = device[self.model][0]
+                self.heard_version = device[self.model][2]
                 break
         self.children = []
 
     @property
     def is_supported(self):
         return self.platforms is not None
-
 
 class AiotEntityBase(Entity):
     def __init__(self, hass, device, res_params, type_name, channel=None, **kwargs):
@@ -90,28 +94,34 @@ class AiotEntityBase(Entity):
         self._attr_voltage = None
         # battery_level、home_room、no_motion_seconds、
         # 数据更新触发时间，仅限来自mq消息获取到触发信息时间
-        self._trigger_time = None
+        self.trigger_time = None
+        self._position_name = device.position_name
+
+        manufacturer = (device.model or "Lumi").split(".", 1)[0].capitalize() if device.manufacturer is None else device.manufacturer
 
         self._attr_unique_id = (
-            f"{DOMAIN}.{type_name}_0x{device.did.split('.', 1)[1]}_{kwargs.get('hass_attr_name')}"
+            f"{DOMAIN}.{type_name}_{manufacturer.lower()}_{device.did.split('.', 1)[1][-6:]}_{kwargs.get('hass_attr_name')}"
         )
-        self.entity_id = f"{DOMAIN}.0x{device.did.split('.', 1)[1]}_{kwargs.get('hass_attr_name')}"
+        self.entity_id = f"{DOMAIN}.{manufacturer.lower()}_{device.did.split('.', 1)[1][-6:]}_{kwargs.get('hass_attr_name')}"
         if channel:
             self._attr_unique_id = f"{self._attr_unique_id}_{channel}"
             self.entity_id = f"{self.entity_id}_{channel}"
+    
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device.did)},
             name=self._attr_name,
             model=device.model,
-            manufacturer=(device.model or "Lumi").split(".", 1)[0].capitalize(),
+            manufacturer=manufacturer,
             sw_version=device.firmware_version,
+            hw_version=device.heard_version,
+            suggested_area=self._position_name
         )
         self._attr_supported_features = kwargs.get("supported_features")
         self._attr_unit_of_measurement = kwargs.get("unit_of_measurement")
         self._attr_device_class = kwargs.get("device_class")
 
         self._aiot_manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
-        self._extra_state_attributes = []
+        self._extra_state_attributes = ["position_name"]
 
     def debug(self, message: str):
         """ deubug function """
@@ -143,10 +153,15 @@ class AiotEntityBase(Entity):
     def firmware_version(self):
         """Return firmware version."""
         return self._attr_firmware_version
+    
+    @property
+    def position_name(self):
+        return self._position_name
 
     @property
-    def trigger_time(self):
-        return self._trigger_time
+    def trigger_dt(self):
+        if self.trigger_time is not None:
+            return datetime.fromtimestamp(self.trigger_time, local_zone())
 
     @property
     def extra_state_attributes(self):
@@ -161,12 +176,7 @@ class AiotEntityBase(Entity):
         return data
 
     def get_res_id_by_name(self, res_name):
-        # if self._channel and res_name == "disable_btn":
-        #     return self._res_params[res_name][0].format(self._channel -1)
         return self._res_params[res_name][0].format(self._channel)
-
-    def set_trigger_time(self, trigger_time):
-        self._trigger_time = trigger_time
 
     async def async_set_res_value(self, res_name, value):
         """设置资源值"""
@@ -181,7 +191,7 @@ class AiotEntityBase(Entity):
         """获取资源值"""
         res_ids = []
         if len(args) > 0:
-            res_ids = args
+            res_ids.extend(args)
         else:
             [
                 res_ids.append(self.get_res_id_by_name(k))
@@ -206,11 +216,21 @@ class AiotEntityBase(Entity):
             self.device.did, res_ids,page_size=page_size
         )
 
+
+    async def async_query_position_detail(self, positionIds):
+        return await self._aiot_manager.session.async_query_position_detail(
+            positionIds
+        )
+
     async def async_update(self):
         resp = await self.async_fetch_res_values()
+        histsoy_resp = await self.async_fetch_resource_history()
         if resp:
             for x in resp:
                 await self.async_set_attr(x["resourceId"], x["value"], write_ha_state=False)
+                for h in histsoy_resp['data']:
+                    if h['resourceId'] == x["resourceId"]:
+                        self.trigger_time = int(h['timeStamp'] / 1000.0)
 
     async def async_set_resource(self, res_name, attr_value):
         """设置aiot resource的值"""
@@ -273,7 +293,7 @@ class AiotEntityBase(Entity):
         return await self._aiot_manager.session.async_query_ir_learnresult(
             self.device.did, keyid
         )
-
+    
     def convert_attr_to_res(self, res_name, attr_value):
         """从attr转换到res"""
         return attr_value
@@ -409,7 +429,7 @@ class AiotManager:
                 entities = self._devices_entities.get(x["subjectId"])
                 if entities:
                     for entity in entities:
-                        entity.set_trigger_time(round(int(x['time']) / 1000.0, 0))
+                        entity.trigger_time = round(int(x['time']) / 1000.0, 0)
                         if x["resourceId"] in entity.supported_resources:
                             await entity.async_set_attr(x["resourceId"], x["value"])
         elif msg.get("eventType"):
@@ -441,7 +461,11 @@ class AiotManager:
         """获取Aiot所有设备"""
         self._all_devices = {}
         results = await self._session.async_query_all_devices_info()
-        [self._all_devices.setdefault(x["did"], AiotDevice(**x)) for x in results]
+        for x in results:
+            device = AiotDevice(**x)
+            postions = await self._session.async_query_position_detail([device.position_id])
+            device.position_name = postions[0]['positionName']
+            self._all_devices.setdefault(x["did"], device)
 
     async def async_add_devices(
         self,

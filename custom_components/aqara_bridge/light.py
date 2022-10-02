@@ -31,6 +31,7 @@ class AiotLightEntity(AiotToggleableEntityBase, LightEntity):
             self, hass, device, res_params, TYPE, channel, **kwargs
         )
         self._attr_color_mode = kwargs.get("color_mode")
+        self._extra_state_attributes.extend(["trigger_time", "trigger_dt"])
 
     async def async_turn_on(self, **kwargs):
         """Turn the specified light on."""

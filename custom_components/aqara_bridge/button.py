@@ -45,31 +45,14 @@ class AiotButtonEntity(AiotEntityBase, SensorEntity):
         
     @property
     def native_value(self):
-        if self._trigger_time is not None:
-            return datetime.fromtimestamp(self._trigger_time, local_zone())
-        else:
-            return datetime.fromtimestamp(time.time(), local_zone())
-
-    @property
-    def trigger_dt(self):
-        if self._trigger_time is not None:
-            return datetime.fromtimestamp(self._trigger_time, local_zone())
+        if self.trigger_time is not None:
+            return datetime.fromtimestamp(self.trigger_time, local_zone())
         else:
             return datetime.fromtimestamp(time.time(), local_zone())
 
     @property
     def press_type(self):
         return self._attr_press_type
-
-    async def async_update(self):
-        resp = await self.async_fetch_res_values()
-        histsoy_resp = await self.async_fetch_resource_history()
-        if resp:
-            for x in resp:
-                await self.async_set_attr(x["resourceId"], x["value"], write_ha_state=False)
-                for h in histsoy_resp['data']:
-                    if h['resourceId'] == x["resourceId"]:
-                        self.set_trigger_time(int(h['timeStamp'] / 1000.0))
 
     def convert_res_to_attr(self, res_name, res_value):
         if res_name == "firmware_version":

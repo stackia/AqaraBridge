@@ -38,6 +38,7 @@ class AiotBinarySensorEntity(AiotEntityBase, BinarySensorEntity):
         AiotEntityBase.__init__(self, hass, device, res_params, TYPE, channel, **kwargs)
         self._attr_state_class = kwargs.get("state_class")
         self._attr_name = f"{self._attr_name} {self._attr_device_class}"
+        self._extra_state_attributes.extend(["trigger_time", "trigger_dt"])
 
     def convert_res_to_attr(self, res_name, res_value):
         if res_name == "firmware_version":
@@ -60,12 +61,8 @@ class AiotBinarySensorEntity(AiotEntityBase, BinarySensorEntity):
 class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
     # 不需要自定义定时器，通过消息订阅
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name == "firmware_version":
-            return res_value
-        if res_name == "zigbee_lqi":
-            return int(res_value)
-        if res_name == "voltage":
-            return format(float(res_value) / 1000, '.3f')
+        if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
+            return super().convert_res_to_attr(res_name, res_value)
 
         self._attr_is_on = not bool(res_value)
         self.schedule_update_ha_state()
@@ -74,12 +71,8 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
 
 class AiotDoorBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name == "firmware_version":
-            return res_value
-        if res_name == "zigbee_lqi":
-            return int(res_value)
-        if res_name == "voltage":
-            return format(float(res_value) / 1000, '.3f')
+        if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
+            return super().convert_res_to_attr(res_name, res_value)
 
         self._attr_is_on = not bool(res_value)
         self.schedule_update_ha_state()

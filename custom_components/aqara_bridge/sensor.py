@@ -33,26 +33,15 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
         self._attr_state_class = kwargs.get("state_class")
         self._attr_name = f"{self._attr_name} {self._attr_device_class}"
         self._attr_native_unit_of_measurement = kwargs.get("unit_of_measurement")
-        
-        tim = round(int(time.time()), 0)
-        self._attr_last_update_time = tim
-        self._attr_last_update_at = datetime.fromtimestamp(tim, local_zone())
         self._extra_state_attributes.extend(["last_update_time", "last_update_at"])
 
     @property
     def last_update_time(self):
-        self._refresh_data()
-        return self._attr_last_update_time
+        return self.trigger_time
 
     @property
     def last_update_at(self):
-        self._refresh_data()
-        return self._attr_last_update_at
-
-    def _refresh_data(self):
-        if self.trigger_time is not None:
-            self._attr_last_update_time = self.trigger_time
-            self._attr_last_update_at = datetime.fromtimestamp(self.trigger_time, local_zone())
+        return self.trigger_dt
 
     def convert_res_to_attr(self, res_name, res_value):
         if res_name == "battry":

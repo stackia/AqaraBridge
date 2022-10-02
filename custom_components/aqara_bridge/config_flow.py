@@ -107,15 +107,13 @@ class AqaraBridgeFlowHandler(ConfigFlow, domain=DOMAIN):
                     )
                     return await self.async_step_select_devices()
                 else:
-                    # TODO 这里要处理API失败的情况
-                    pass
+                    errors['base'] = 'refresh_token_error'
             else:
                 resp = await self._session.async_get_auth_code(self.account, 0)
                 if resp["code"] == 0:
                     return await self.async_step_get_token()
                 else:
-                    # TODO 这里要处理API失败的情况
-                    pass
+                    errors['base'] = 'auth_code_error'
 
         return self.async_show_form(
             step_id="get_auth_code",

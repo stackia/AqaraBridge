@@ -20,7 +20,6 @@ API_DOMAIN = {
 APP_ID = "88110776288481280040ace0"
 KEY_ID = "K.881107763014836224"
 APP_KEY = "t7g6qhx4nmbeqmfq1w6yksucnbrofsgs"
-
 _DEBUG_ACCESSTOKEN = ""
 _DEBUG_REFRESHTOEEN = ""
 _DEBUG_STATUS = False
@@ -336,4 +335,11 @@ class AiotCloud:
         return await self._async_invoke_aqara_cloud_api(
             intent="query.ir.learnResult",
             resources=[{"subjectId": subject_id, "keyId": keyid}]
+        )
+    
+    async def async_query_position_detail(self, positionIds: list):
+        """查询位置信息"""
+        return await self._async_invoke_aqara_cloud_api(
+            intent="query.position.detail",
+            positionIds=positionIds,
         )
