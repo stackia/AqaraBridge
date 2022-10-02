@@ -262,6 +262,13 @@ class AiotCloud:
             subjectId=subject_id, resourceIds=resource_ids,
             startTime=startTime ,endTime=endTime, size=page_size
         )
+    
+    async def async_query_resource_name(self, subjectIds: list):
+        """查询资源名称"""
+        return await self._async_invoke_aqara_cloud_api(
+            intent="query.resource.name",
+            subjectIds=subjectIds,
+        )
 
     async def async_write_resource_device(
         self, subject_id: str, resource_id: str, value: str

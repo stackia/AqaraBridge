@@ -58,6 +58,7 @@ class AiotDevice:
         self.platforms = None
         self.manufacturer = None
         self.heard_version = None
+        self.resource_names = []
         for device in AIOT_DEVICE_MAPPING:
             if self.model in device:
                 self.platforms = device['params']
@@ -222,6 +223,11 @@ class AiotEntityBase(Entity):
             positionIds
         )
 
+    async def async_query_resource_name(self, subjectIds):
+        return await self._aiot_manager.session.async_query_resource_name(
+            subjectIds
+        )
+
     async def async_update(self):
         resp = await self.async_fetch_res_values()
         histsoy_resp = await self.async_fetch_resource_history()
@@ -259,6 +265,10 @@ class AiotEntityBase(Entity):
         tup_res = self._res_params.get(res_name)
         attr_value = self.convert_res_to_attr(res_name, res_value)
         current_value = getattr(self, tup_res[1], None)
+        for rname in self.device.resource_names:
+            if rname['resourceId'] == res_id:
+                self._attr_name = rname['name']
+
         if 'verbose' in self._aiot_manager.debug_option:
             self.debug("set value {} current: {} write: {}".format(attr_value, current_value, write_ha_state))
         if current_value != attr_value:
@@ -543,7 +553,7 @@ class AiotManager:
                         if entity_type in p:
                             params.append(p[entity_type])
                     break
-
+            device.resource_names = await self._session.async_query_resource_name([device.did])
             ch_count = None
             # 这里需要处理特殊设备
             if device.model == "lumi.airrtc.vrfegl01":
