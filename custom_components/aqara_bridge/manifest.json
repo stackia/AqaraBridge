@@ -5,8 +5,8 @@
     "iot_class": "cloud_polling",
     "documentation": "",
     "issue_tracker": "",
-    "requirements": ["rocketmq","tzlocal"],
+    "requirements": ["rocketmq", "tzlocal"],
     "dependencies": [],
-    "codeowners": ["@angeljanne"],
-    "version": "v0.1.0"
+    "codeowners": ["@angeljanne","@meishild"],
+    "version": "v0.1.1"
   }

@@ -20,9 +20,9 @@ API_DOMAIN = {
 APP_ID = "88110776288481280040ace0"
 KEY_ID = "K.881107763014836224"
 APP_KEY = "t7g6qhx4nmbeqmfq1w6yksucnbrofsgs"
-_DEBUG_ACCESSTOKEN = "c80bb5fa31c1e9684fe1c6019b7cdcb7"
+_DEBUG_ACCESSTOKEN = ""
 _DEBUG_REFRESHTOEEN = ""
-_DEBUG_STATUS = True
+_DEBUG_STATUS = False
 
 def get_random_string(length: int):
     seq = string.ascii_uppercase + string.digits

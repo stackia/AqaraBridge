@@ -434,8 +434,6 @@ class AiotManager:
             if 'msg' in self.debug_option:
                 self.debug("msgType {}".format(msg['data']))
             for x in msg["data"]:
-                if x['resourceId'] in ["13.1.85", "13.2.85"]:
-                    _LOGGER.info("msgType {}".format(msg['data']))
                 entities = self._devices_entities.get(x["subjectId"])
                 if entities:
                     for entity in entities:
