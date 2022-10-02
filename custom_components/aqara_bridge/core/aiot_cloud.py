@@ -48,7 +48,7 @@ def gen_sign(
 
 
 class AiotCloud:
-    access_token_ = None
+    access_token = None
     refresh_token = None
     update_token_event_callback = None
 
