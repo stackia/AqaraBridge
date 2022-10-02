@@ -49,7 +49,6 @@ def init_hass_data(hass):
         hass.data[DOMAIN].setdefault(HASS_DATA_AIOT_MANAGER, AiotManager(hass, session))
     hass.data[DOMAIN][CONF_DEBUG] = _LOGGER.level > 0  # default debug from Hass config
 
-
 async def async_setup(hass, config):
     """Setup component."""
     init_hass_data(hass)
