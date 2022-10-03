@@ -59,14 +59,73 @@ class AiotBinarySensorEntity(AiotEntityBase, BinarySensorEntity):
         return self._attr_is_on
         
 class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
-    # 不需要自定义定时器，通过消息订阅
+    def __init__(self, hass, device, res_params, channel=None, **kwargs):
+        AiotBinarySensorEntity.__init__(self, hass, device, res_params, channel, **kwargs)
+        self._default_delay = 120
+        self._last_on = 0
+        self._last_off = 0
+        self._timeout_pos = 0
+        self._unsub_set_no_motion = None
+        self._attr_is_on = False
+    
+    async def _start_no_motion_timer(self, delay: float):
+        if self._unsub_set_no_motion:
+            self._unsub_set_no_motion()
+
+        self._unsub_set_no_motion = async_call_later(
+            self.hass, abs(delay), self._set_no_motion)
+
+    async def _set_no_motion(self, *args):
+        self._last_off = time.time()
+        self._timeout_pos = 0
+        self._unsub_set_no_motion = None
+        self._attr_is_on = False
+        self.schedule_update_ha_state()
+
+        # repeat event from Aqara integration
+        self.hass.bus.fire('xiaomi_aqara.motion', {
+            'entity_id': self.entity_id
+        })
+
     def convert_res_to_attr(self, res_name, res_value):
         if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
             return super().convert_res_to_attr(res_name, res_value)
 
-        self._attr_is_on = not bool(res_value)
+        res_value = int(res_value)
+        time_now = time.time()
+
+        if time_now - self._last_on < 1:
+            return
+        self._attr_is_on = bool(res_value)
+        self._last_on = time_now
+
+        # handle available change
         self.schedule_update_ha_state()
-        return not bool(res_value)
+
+        if self._unsub_set_no_motion:
+            self._unsub_set_no_motion()
+
+        custom = self.hass.data[DATA_CUSTOMIZE].get(self.entity_id)
+        # if customize of any entity will be changed from GUI - default value
+        # for all motion sensors will be erased
+        timeout = custom.get(CONF_OCCUPANCY_TIMEOUT, self._default_delay)
+        if timeout:
+            if isinstance(timeout, list):
+                pos = min(self._timeout_pos, len(timeout) - 1)
+                delay = timeout[pos]
+                self._timeout_pos += 1
+            else:
+                delay = timeout
+
+            if delay < 0 and time_now + delay < self._last_off:
+                delay *= 2
+            self.hass.add_job(self._start_no_motion_timer, delay)
+
+        # repeat event from Aqara integration
+        self.hass.bus.fire('xiaomi_aqara.motion', {
+            'entity_id': self.entity_id
+        })
+        return bool(res_value)
 
 
 class AiotDoorBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
@@ -74,6 +133,6 @@ class AiotDoorBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
             return super().convert_res_to_attr(res_name, res_value)
 
-        self._attr_is_on = not bool(res_value)
+        self._attr_is_on = int(res_value) == 1
         self.schedule_update_ha_state()
-        return not bool(res_value)
+        return int(res_value) == 1
