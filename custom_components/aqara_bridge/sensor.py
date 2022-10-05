@@ -31,7 +31,6 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
     def __init__(self, hass, device, res_params, channel=None, **kwargs):
         AiotEntityBase.__init__(self, hass, device, res_params, TYPE, channel, **kwargs)
         self._attr_state_class = kwargs.get("state_class")
-        self._attr_name = f"{self._attr_name} {self._attr_device_class}"
         self._attr_native_unit_of_measurement = kwargs.get("unit_of_measurement")
         self._extra_state_attributes.extend(["last_update_time", "last_update_at"])
 

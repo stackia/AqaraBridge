@@ -37,7 +37,6 @@ class AiotBinarySensorEntity(AiotEntityBase, BinarySensorEntity):
     def __init__(self, hass, device, res_params, channel=None, **kwargs):
         AiotEntityBase.__init__(self, hass, device, res_params, TYPE, channel, **kwargs)
         self._attr_state_class = kwargs.get("state_class")
-        self._attr_name = f"{self._attr_name} {self._attr_device_class}"
         self._extra_state_attributes.extend(["trigger_time", "trigger_dt"])
 
     def convert_res_to_attr(self, res_name, res_value):
