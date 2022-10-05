@@ -267,7 +267,10 @@ class AiotEntityBase(Entity):
         current_value = getattr(self, tup_res[1], None)
         for rname in self.device.resource_names:
             if rname['resourceId'] == res_id:
-                self._attr_name = self._position_name + "-" + rname['name']
+                if self._position_name:
+                    self._attr_name = self._position_name + "-" + rname['name']
+                else:
+                    self._attr_name = rname['name']
 
         if 'verbose' in self._aiot_manager.debug_option:
             self.debug("set value {} current: {} write: {}".format(attr_value, current_value, write_ha_state))
