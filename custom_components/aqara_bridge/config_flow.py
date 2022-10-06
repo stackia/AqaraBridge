@@ -11,25 +11,7 @@ from homeassistant.config_entries import (
 from homeassistant.core import callback
 
 from . import init_hass_data, data_masking, gen_auth_entry
-from .core.const import (
-    DOMAIN,
-    CONF_FIELD_ACCOUNT,
-    CONF_FIELD_COUNTRY_CODE,
-    CONF_FIELD_AUTH_CODE,
-    CONF_FIELD_SELECTED_DEVICES,
-    CONF_FIELD_REFRESH_TOKEN,
-    CONF_ENTRY_AUTH_ACCOUNT,
-    HASS_DATA_AIOTCLOUD,
-    HASS_DATA_AIOT_MANAGER,
-    SERVER_COUNTRY_CODES,
-    SERVER_COUNTRY_CODES_DEFAULT,
-    CONF_ENTRY_AUTH_ACCOUNT,
-    HASS_DATA_AUTH_ENTRY_ID,
-    CONF_DEBUG,
-    CONF_STATS,
-    OPT_DEBUG
-)
-
+from .core.const import *
 _LOGGER = logging.getLogger(__name__)
 
 DEVICE_GET_AUTH_CODE_CONFIG = vol.Schema(
@@ -39,6 +21,9 @@ DEVICE_GET_AUTH_CODE_CONFIG = vol.Schema(
             CONF_FIELD_COUNTRY_CODE, default=SERVER_COUNTRY_CODES_DEFAULT
         ): vol.In(SERVER_COUNTRY_CODES),
         vol.Optional(CONF_FIELD_REFRESH_TOKEN): str,
+        # vol.Optional(CONF_FIELD_APPID): str,
+        # vol.Optional(CONF_FIELD_APPKEY): str,
+        # vol.Optional(CONF_FIELD_KEYID): str,
     }
 )
 
@@ -107,15 +92,13 @@ class AqaraBridgeFlowHandler(ConfigFlow, domain=DOMAIN):
                     )
                     return await self.async_step_select_devices()
                 else:
-                    # TODO 这里要处理API失败的情况
-                    pass
+                    errors['base'] = 'refresh_token_error'
             else:
                 resp = await self._session.async_get_auth_code(self.account, 0)
                 if resp["code"] == 0:
                     return await self.async_step_get_token()
                 else:
-                    # TODO 这里要处理API失败的情况
-                    pass
+                    errors['base'] = 'auth_code_error'
 
         return self.async_show_form(
             step_id="get_auth_code",

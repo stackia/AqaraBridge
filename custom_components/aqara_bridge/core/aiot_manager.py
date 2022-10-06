@@ -1,12 +1,13 @@
 import asyncio
 import json
 import logging
-from typing import Optional, Union
 
+from typing import Optional, Union
+from datetime import datetime
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity import DeviceInfo, Entity
-from rocketmq.client import PushConsumer, RecvMessage
+
 
 from .aiot_cloud import AiotCloud, APP_ID, KEY_ID, APP_KEY
 from .aiot_mapping import (
@@ -17,10 +18,28 @@ from .aiot_mapping import (
     AIOT_DEVICE_MAPPING,
 )
 from .const import DOMAIN, HASS_DATA_AIOT_MANAGER, CONF_DEBUG
-
+from .utils import local_zone
 
 _LOGGER = logging.getLogger(__name__)
 
+
+def __init_rocketmq():
+    import platform, os
+    fp = "%s/custom_components/aqara_bridge/3rd_libs/%s/librocketmq.so" % (os.path.abspath('.'), platform.machine())
+    if platform.system() != "Linux" or not os.path.exists(fp):
+        _LOGGER.error(f"AqaraBridge need rocketmq, you need install it. Not Fund librocketmq from %s." % fp)
+        return 
+    target_p = "/usr/local/lib/librocketmq.so"
+    if not os.path.exists(target_p):
+        import shutil
+        _LOGGER.warning(f"Copy librocketmq from %s to %s" % (fp, target_p))
+        shutil.copyfile(fp, target_p)
+
+try:
+    from rocketmq.client import PushConsumer, RecvMessage
+except:
+    __init_rocketmq()
+    from rocketmq.client import PushConsumer, RecvMessage
 
 class AiotDevice:
     def __init__(self, **kwargs):
@@ -34,62 +53,87 @@ class AiotDevice:
         self.firmware_version = kwargs.get("firmwareVersion")
         self.create_time = kwargs.get("createTime")
         self.update_time = kwargs.get("updateTime")
+        self.position_id = kwargs.get("positionId")
+        self.position_name = None
         self.platforms = None
+        self.manufacturer = None
+        self.heard_version = None
+        self.resource_names = []
         for device in AIOT_DEVICE_MAPPING:
             if self.model in device:
                 self.platforms = device['params']
+                self.manufacturer = device[self.model][0]
+                self.heard_version = device[self.model][2]
                 break
         self.children = []
 
     @property
     def is_supported(self):
         return self.platforms is not None
-
+    
+    def get_resource_name(self, resource_id):
+        for r in self.resource_names:
+            if r['resourceId'] == resource_id:
+               return r['name']
 
 class AiotEntityBase(Entity):
-    _channel = None
-    _device = None
-    _res_params = None
-    _supported_resources = None
-    _aiot_manager = None
-
-    _attr_lqi = None
-    _attr_chip_temperature = None
-    _attr_voltage = None
-    _attr_fw_ver = None
-
     def __init__(self, hass, device, res_params, type_name, channel=None, **kwargs):
-        self._device = device
-        self._res_params = res_params
-        self._supported_resources = []
-        [
-            self._supported_resources.append(v[0].format(channel))
-            for k, v in res_params.items()
-        ]
-        self._channel = channel
-
         self.hass = hass
+         # 设备信息
+        self._device = device
+        # 参数
+        self._res_params = res_params
         self._attr_name = device.device_name
+        self._position_name = device.position_name
+        self._supported_resources = []
+        for k, v in res_params.items():
+            resource_id = v[0].format(channel)
+            self._supported_resources.append(resource_id)
+            # 获取资源名称
+            resource_name = device.get_resource_name(resource_id)
+            if resource_name is not None:
+                 self._attr_name = resource_name
+        
+        if self._position_name is not None:
+            self._attr_name = "%s-%s" % (self._position_name, self._attr_name)
+
+        # 按键通道，多按键参数
+        self._channel = channel
+        
         self._attr_should_poll = False
+        self._attr_firmware_version = device.firmware_version
+        # Zigbee信号强度
+        self._attr_zigbee_lqi = None
+        # 电压
+        self._attr_voltage = None
+        # 数据更新触发时间，仅限来自mq消息获取到触发信息时间
+        self.trigger_time = None
+        # 设备厂商
+        manufacturer = (device.model or "Lumi").split(".", 1)[0].capitalize() if device.manufacturer is None else device.manufacturer
+
         self._attr_unique_id = (
-            f"{DOMAIN}.{type_name}_0x{device.did.split('.', 1)[1]}_{kwargs.get('hass_attr_name')}"
+            f"{DOMAIN}.{type_name}_{manufacturer.lower()}_{device.did.split('.', 1)[1][-6:]}_{kwargs.get('hass_attr_name')}"
         )
-        self.entity_id = f"{DOMAIN}.0x{device.did.split('.', 1)[1]}_{kwargs.get('hass_attr_name')}"
+        self.entity_id = f"{DOMAIN}.{manufacturer.lower()}_{device.did.split('.', 1)[1][-6:]}_{kwargs.get('hass_attr_name')}"
         if channel:
             self._attr_unique_id = f"{self._attr_unique_id}_{channel}"
             self.entity_id = f"{self.entity_id}_{channel}"
+    
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device.did)},
             name=self._attr_name,
             model=device.model,
-            manufacturer=(device.model or "Lumi").split(".", 1)[0].capitalize(),
+            manufacturer=manufacturer,
             sw_version=device.firmware_version,
+            hw_version=device.heard_version,
+            suggested_area=self._position_name
         )
         self._attr_supported_features = kwargs.get("supported_features")
         self._attr_unit_of_measurement = kwargs.get("unit_of_measurement")
         self._attr_device_class = kwargs.get("device_class")
 
         self._aiot_manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
+        self._extra_state_attributes = ["position_name"]
 
     def debug(self, message: str):
         """ deubug function """
@@ -108,14 +152,9 @@ class AiotEntityBase(Entity):
         return self._device
 
     @property
-    def lqi(self):
+    def zigbee_lqi(self):
         """Return the signal strength of zigbee """
-        return self._attr_lqi
-
-    @property
-    def chip_temperature(self):
-        """Return the chip temperature."""
-        return self._attr_chip_temperature
+        return self._attr_zigbee_lqi
 
     @property
     def voltage(self):
@@ -123,9 +162,30 @@ class AiotEntityBase(Entity):
         return self._attr_voltage
 
     @property
-    def fw_ver(self):
+    def firmware_version(self):
         """Return firmware version."""
-        return self._attr_fw_ver
+        return self._attr_firmware_version
+    
+    @property
+    def position_name(self):
+        return self._position_name
+
+    @property
+    def trigger_dt(self):
+        if self.trigger_time is not None:
+            return datetime.fromtimestamp(self.trigger_time, local_zone())
+
+    @property
+    def extra_state_attributes(self):
+        """Return the optional state attributes."""
+        data = {}
+
+        for attr in self._extra_state_attributes:
+            value = getattr(self, attr)
+            if value is not None:
+                data[attr] = value
+
+        return data
 
     def get_res_id_by_name(self, res_name):
         return self._res_params[res_name][0].format(self._channel)
@@ -143,7 +203,7 @@ class AiotEntityBase(Entity):
         """获取资源值"""
         res_ids = []
         if len(args) > 0:
-            res_ids = args
+            res_ids.extend(args)
         else:
             [
                 res_ids.append(self.get_res_id_by_name(k))
@@ -153,11 +213,41 @@ class AiotEntityBase(Entity):
             self.device.did, res_ids
         )
 
+    async def async_fetch_resource_history(self, page_size=1, *args):
+        """page_size过大会请求异常，如果为了获取最后状态只用1就可以"""
+        res_ids = []
+        if len(args) > 0:
+            res_ids = args
+        else:
+            [
+                res_ids.append(self.get_res_id_by_name(k))
+                for k, v in self._res_params.items()
+            ]
+        
+        return await self._aiot_manager.session.async_query_resource_history(
+            self.device.did, res_ids,page_size=page_size
+        )
+
+
+    async def async_query_position_detail(self, positionIds):
+        return await self._aiot_manager.session.async_query_position_detail(
+            positionIds
+        )
+
+    async def async_query_resource_name(self, subjectIds):
+        return await self._aiot_manager.session.async_query_resource_name(
+            subjectIds
+        )
+
     async def async_update(self):
         resp = await self.async_fetch_res_values()
+        histsoy_resp = await self.async_fetch_resource_history()
         if resp:
             for x in resp:
                 await self.async_set_attr(x["resourceId"], x["value"], write_ha_state=False)
+                for h in histsoy_resp['data']:
+                    if h['resourceId'] == x["resourceId"]:
+                        self.trigger_time = int(h['timeStamp'] / 1000.0)
 
     async def async_set_resource(self, res_name, attr_value):
         """设置aiot resource的值"""
@@ -186,6 +276,7 @@ class AiotEntityBase(Entity):
         tup_res = self._res_params.get(res_name)
         attr_value = self.convert_res_to_attr(res_name, res_value)
         current_value = getattr(self, tup_res[1], None)
+
         if 'verbose' in self._aiot_manager.debug_option:
             self.debug("set value {} current: {} write: {}".format(attr_value, current_value, write_ha_state))
         if current_value != attr_value:
@@ -220,7 +311,7 @@ class AiotEntityBase(Entity):
         return await self._aiot_manager.session.async_query_ir_learnresult(
             self.device.did, keyid
         )
-
+    
     def convert_attr_to_res(self, res_name, attr_value):
         """从attr转换到res"""
         return attr_value
@@ -347,12 +438,14 @@ class AiotManager:
         """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
         if msg.get("msgType"):
             # 属性消息，resource_report
+            
             if 'msg' in self.debug_option:
                 self.debug("msgType {}".format(msg['data']))
             for x in msg["data"]:
                 entities = self._devices_entities.get(x["subjectId"])
                 if entities:
                     for entity in entities:
+                        entity.trigger_time = round(int(x['time']) / 1000.0, 0)
                         if x["resourceId"] in entity.supported_resources:
                             await entity.async_set_attr(x["resourceId"], x["value"])
         elif msg.get("eventType"):
@@ -384,7 +477,11 @@ class AiotManager:
         """获取Aiot所有设备"""
         self._all_devices = {}
         results = await self._session.async_query_all_devices_info()
-        [self._all_devices.setdefault(x["did"], AiotDevice(**x)) for x in results]
+        for x in results:
+            device = AiotDevice(**x)
+            postions = await self._session.async_query_position_detail([device.position_id])
+            device.position_name = postions[0]['positionName']
+            self._all_devices.setdefault(x["did"], device)
 
     async def async_add_devices(
         self,
@@ -462,7 +559,7 @@ class AiotManager:
                         if entity_type in p:
                             params.append(p[entity_type])
                     break
-
+            device.resource_names = await self._session.async_query_resource_name([device.did])
             ch_count = None
             # 这里需要处理特殊设备
             if device.model == "lumi.airrtc.vrfegl01":

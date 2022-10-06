@@ -21,7 +21,6 @@ APP_ID = "88110776288481280040ace0"
 KEY_ID = "K.881107763014836224"
 APP_KEY = "t7g6qhx4nmbeqmfq1w6yksucnbrofsgs"
 
-
 def get_random_string(length: int):
     seq = string.ascii_uppercase + string.digits
     return "".join((random.choice(seq) for _ in range(length)))
@@ -118,10 +117,10 @@ class AiotCloud:
                 # 这里的异常处理需要优化
                 if jo["code"] != 0:
                     # 调用Aiot api失败，返回值
-                    _LOGGER.warn(f"Call Aiot api failed，return：{jo}")
+                    _LOGGER.warning(f"Call Aiot api failed，request:{payload},return:{jo}")
                     if jo["code"] == 108:
                         # 令牌过期或异常，正在尝试自动刷新
-                        _LOGGER.warn(f"Aiot token expired, trying to auto refresh！")
+                        _LOGGER.warning(f"Aiot token expired, trying to auto refresh！")
                         new_jo = await self.async_refresh_token(self.refresh_token)
                         if new_jo["code"] == 0:
                             # Aiot令牌更新成功！
@@ -131,7 +130,7 @@ class AiotCloud:
                             )
                         else:
                             # Aiot令牌更新失败，请重新授权
-                            _LOGGER.warn("Aiot token refresh failed, please do authorization again！")
+                            _LOGGER.error("Aiot token refresh failed, please do authorization again！")
                 return jo.get("result")
             else:
                 return jo
@@ -180,10 +179,11 @@ class AiotCloud:
             self.refresh_token = jo["result"]["refreshToken"]
             if self.update_token_event_callback:
                 self.update_token_event_callback(self.access_token, self.refresh_token)
-
+        else:
+            _LOGGER.error(f"Call Aiot api refresh token failed，request:{refresh_token},return:{jo}")
         return jo
 
-    async def async_query_device_sub_info(self, did: str):
+    async def async_query_device_bind_key(self, did: str):
         """获取设备入网bindKey"""
         return await self._async_invoke_aqara_cloud_api(
             intent="query.device.bindKey", did=did
@@ -240,6 +240,25 @@ class AiotCloud:
         return await self._async_invoke_aqara_cloud_api(
             intent="query.resource.value",
             resources=[{"subjectId": subject_id, "resourceIds": resource_ids}],
+        )
+
+    async def async_query_resource_history(self, subject_id: str, resource_ids: list,
+        startTime=None, endTime=None, page_size: int = 30):
+        if endTime is None and startTime is None:
+            endTime = int(time.time() * 1000)
+            startTime = int(endTime - (7 * 24 * 3600 * 1000))
+        """查询资源历史信息"""
+        return await self._async_invoke_aqara_cloud_api(
+            intent="fetch.resource.history",
+            subjectId=subject_id, resourceIds=resource_ids,
+            startTime=startTime ,endTime=endTime, size=page_size
+        )
+    
+    async def async_query_resource_name(self, subjectIds: list):
+        """查询资源名称"""
+        return await self._async_invoke_aqara_cloud_api(
+            intent="query.resource.name",
+            subjectIds=subjectIds,
         )
 
     async def async_write_resource_device(
@@ -314,4 +333,11 @@ class AiotCloud:
         return await self._async_invoke_aqara_cloud_api(
             intent="query.ir.learnResult",
             resources=[{"subjectId": subject_id, "keyId": keyid}]
+        )
+    
+    async def async_query_position_detail(self, positionIds: list):
+        """查询位置信息"""
+        return await self._async_invoke_aqara_cloud_api(
+            intent="query.position.detail",
+            positionIds=positionIds,
         )
