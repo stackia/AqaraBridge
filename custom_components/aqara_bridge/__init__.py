@@ -17,6 +17,11 @@ from .core.utils import AqaraBridgeDebug
 
 _LOGGER = logging.getLogger(__name__)
 
+_DEBUG_ACCESSTOKEN = ""
+_DEBUG_REFRESHTOEEN = ""
+_DEBUG_STATUS = False
+
+
 def data_masking(s: str, n: int) -> str:
     return re.sub(f"(?<=.{{{n}}}).(?=.{{{n}}})", "*", str(s))
 
@@ -74,6 +79,13 @@ async def async_setup_entry(hass, entry):
         entry.add_update_listener(async_update_options)
 
     data = entry.data.copy()
+    if _DEBUG_STATUS:
+        import time
+        data[CONF_ENTRY_AUTH_REFRESH_TOKEN] = _DEBUG_REFRESHTOEEN
+        data[CONF_ENTRY_AUTH_ACCESS_TOKEN] = _DEBUG_ACCESSTOKEN
+        data[CONF_ENTRY_AUTH_EXPIRES_TIME] = time.strftime("%Y-%m-%d %H:%M:%S", 
+            time.localtime(time.time() + 24 * 3600))
+
     manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
     if CONF_ENTRY_AUTH_ACCOUNT in entry.data:
         aiotcloud: AiotCloud = hass.data[DOMAIN][HASS_DATA_AIOTCLOUD]

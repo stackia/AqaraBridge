@@ -20,9 +20,6 @@ API_DOMAIN = {
 APP_ID = "88110776288481280040ace0"
 KEY_ID = "K.881107763014836224"
 APP_KEY = "t7g6qhx4nmbeqmfq1w6yksucnbrofsgs"
-_DEBUG_ACCESSTOKEN = ""
-_DEBUG_REFRESHTOEEN = ""
-_DEBUG_STATUS = False
 
 def get_random_string(length: int):
     seq = string.ascii_uppercase + string.digits
@@ -76,12 +73,6 @@ class AiotCloud:
     def _get_request_headers(self):
         """生成Headers"""
         nonce = get_random_string(16)
-        if _DEBUG_STATUS:
-            if _DEBUG_ACCESSTOKEN is not None:
-                self.access_token = _DEBUG_ACCESSTOKEN
-            if _DEBUG_REFRESHTOEEN is not None:
-                self.refresh_token = _DEBUG_REFRESHTOEEN   
-        
         timestamp = str(int(round(time.time() * 1000)))
         sign = gen_sign(
             self.access_token, self.app_id, self.key_id, nonce, timestamp, self.app_key

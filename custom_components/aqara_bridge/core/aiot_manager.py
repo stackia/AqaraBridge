@@ -70,34 +70,45 @@ class AiotDevice:
     @property
     def is_supported(self):
         return self.platforms is not None
+    
+    def get_resource_name(self, resource_id):
+        for r in self.resource_names:
+            if r['resourceId'] == resource_id:
+               return r['name']
 
 class AiotEntityBase(Entity):
     def __init__(self, hass, device, res_params, type_name, channel=None, **kwargs):
+        self.hass = hass
          # 设备信息
         self._device = device
         # 参数
         self._res_params = res_params
-        self._supported_resources = []
-        [
-            self._supported_resources.append(v[0].format(channel))
-            for k, v in res_params.items()
-        ]
-        # 按键通道数量
-        self._channel = channel
-
-        self.hass = hass
         self._attr_name = device.device_name
+        self._position_name = device.position_name
+        self._supported_resources = []
+        for k, v in res_params.items():
+            resource_id = v[0].format(channel)
+            self._supported_resources.append(resource_id)
+            # 获取资源名称
+            resource_name = device.get_resource_name(resource_id)
+            if resource_name is not None:
+                 self._attr_name = resource_name
+        
+        if self._position_name is not None:
+            self._attr_name = "%s-%s" % (self._position_name, self._attr_name)
+
+        # 按键通道，多按键参数
+        self._channel = channel
+        
         self._attr_should_poll = False
         self._attr_firmware_version = device.firmware_version
         # Zigbee信号强度
         self._attr_zigbee_lqi = None
         # 电压
         self._attr_voltage = None
-        # battery_level、home_room、no_motion_seconds、
         # 数据更新触发时间，仅限来自mq消息获取到触发信息时间
         self.trigger_time = None
-        self._position_name = device.position_name
-
+        # 设备厂商
         manufacturer = (device.model or "Lumi").split(".", 1)[0].capitalize() if device.manufacturer is None else device.manufacturer
 
         self._attr_unique_id = (
@@ -265,12 +276,6 @@ class AiotEntityBase(Entity):
         tup_res = self._res_params.get(res_name)
         attr_value = self.convert_res_to_attr(res_name, res_value)
         current_value = getattr(self, tup_res[1], None)
-        for rname in self.device.resource_names:
-            if rname['resourceId'] == res_id:
-                if self._position_name:
-                    self._attr_name = self._position_name + "-" + rname['name']
-                else:
-                    self._attr_name = rname['name']
 
         if 'verbose' in self._aiot_manager.debug_option:
             self.debug("set value {} current: {} write: {}".format(attr_value, current_value, write_ha_state))
