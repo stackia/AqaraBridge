@@ -435,7 +435,6 @@ class AiotManager:
         """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
         if msg.get("msgType"):
             # 属性消息，resource_report
-            
             if 'msg' in self.debug_option:
                 self.debug("msgType {}".format(msg['data']))
             for x in msg["data"]:
