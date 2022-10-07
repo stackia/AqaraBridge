@@ -532,6 +532,34 @@ AIOT_DEVICE_MAPPING = [{
             }
         },
     ]
+}, {
+    #P100门锁
+    'aqara.lock.wbzac1': ["Aqara", "DoorLock P100", ""],
+    'params': [
+        {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "contact",
+                    "device_class": DEVICE_CLASS_DOOR
+                },
+                MK_RESOURCES: {
+                    "status": ("13.12.85", "_attr_native_value"),
+                },
+            }
+        }, {
+            "sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "contact",
+                    "device_class": "",
+                    "state_class": "",
+                    "unit_of_measurement": ""
+                },
+                MK_RESOURCES: {
+                    "status": ("13.2.85", "_attr_native_value")
+                },
+            }
+        }
+    ]
 }
 ]
 
