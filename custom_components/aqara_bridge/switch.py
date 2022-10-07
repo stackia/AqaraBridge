@@ -69,13 +69,9 @@ class AiotWallSwitchEntity(AiotToggleableEntityBase, SwitchEntity):
 
     async def async_update(self):
         resp = await self.async_fetch_res_values()
-        histsoy_resp = await self.async_fetch_resource_history()
         if resp:
             for x in resp:
-                await self.async_set_attr(x["resourceId"], x["value"], write_ha_state=False)
-                for h in histsoy_resp['data']:
-                    if h['resourceId'] == x["resourceId"]:
-                        self.trigger_time = int(h['timeStamp'] / 1000.0)
+                await self.async_set_attr(x["resourceId"], x["value"], x["timeStamp"], write_ha_state=False)
                 if x["resourceId"] in DISABLE_MAPPING.keys():
                     dbtns = await self.async_fetch_res_values(DISABLE_MAPPING.get(x["resourceId"]))
                     if dbtns:

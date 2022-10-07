@@ -241,13 +241,9 @@ class AiotEntityBase(Entity):
 
     async def async_update(self):
         resp = await self.async_fetch_res_values()
-        histsoy_resp = await self.async_fetch_resource_history()
         if resp:
             for x in resp:
-                await self.async_set_attr(x["resourceId"], x["value"], write_ha_state=False)
-                for h in histsoy_resp['data']:
-                    if h['resourceId'] == x["resourceId"]:
-                        self.trigger_time = int(h['timeStamp'] / 1000.0)
+                await self.async_set_attr(x["resourceId"], x["value"], x["timeStamp"], write_ha_state=False)
 
     async def async_set_resource(self, res_name, attr_value):
         """设置aiot resource的值"""
@@ -266,13 +262,14 @@ class AiotEntityBase(Entity):
             self.async_write_ha_state()
             return resp
 
-    async def async_set_attr(self, res_id, res_value, write_ha_state=True):
+    async def async_set_attr(self, res_id, res_value, timestamp, write_ha_state=True):
         """设置ha attr的值"""
         res_name = next(
             k
             for k, v in self._res_params.items()
             if v[0].format(self.channel) == res_id
         )
+        self.trigger_time = round(int(timestamp) / 1000.0, 0)
         tup_res = self._res_params.get(res_name)
         attr_value = self.convert_res_to_attr(res_name, res_value)
         current_value = getattr(self, tup_res[1], None)
@@ -445,9 +442,8 @@ class AiotManager:
                 entities = self._devices_entities.get(x["subjectId"])
                 if entities:
                     for entity in entities:
-                        entity.trigger_time = round(int(x['time']) / 1000.0, 0)
                         if x["resourceId"] in entity.supported_resources:
-                            await entity.async_set_attr(x["resourceId"], x["value"])
+                            await entity.async_set_attr(x["resourceId"], x["value"], x["time"])
         elif msg.get("eventType"):
             if 'msg' in self.debug_option:
                 self.debug("eventType {}".format(msg['data']))
