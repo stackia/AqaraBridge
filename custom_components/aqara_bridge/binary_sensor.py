@@ -25,6 +25,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
     cls_entities = {
         "motion": AiotMotionBinarySensor,
+        "exist": AiotExistBinarySensor,
         "contact": AiotDoorBinarySensor,
         "default": AiotBinarySensorEntity
     }
@@ -90,12 +91,19 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
             return super().convert_res_to_attr(res_name, res_value)
 
+        if self._last_on == 0 and self.trigger_time is not None:
+            self._last_on = self.trigger_time
+
         res_value = int(res_value)
         time_now = time.time()
 
         if time_now - self._last_on < 1:
             return
         self._attr_is_on = bool(res_value)
+        # 检查是否超过最长delay时间，超过未无人状态
+        if time_now - self._last_on > self._default_delay:
+            self._attr_is_on = False
+
         self._last_on = time_now
 
         # handle available change
@@ -125,6 +133,40 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
             'entity_id': self.entity_id
         })
         return bool(res_value)
+
+
+class AiotExistBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
+    def __init__(self, hass, device, res_params, channel=None, **kwargs):
+        AiotBinarySensorEntity.__init__(self, hass, device, res_params, channel, **kwargs)
+        self._extra_state_attributes.extend(["monitor_type", "direction_status", "content_direction", "content_leftright"])
+        self._attr_monitor_type = None
+        self._attr_direction_status = None
+    
+    @property
+    def monitor_type(self):
+        return self._attr_monitor_type
+    
+    @property
+    def direction_status(self):
+        return self._attr_direction_status
+
+    @property
+    def content_direction(self):
+        return "monitor_type:0:无向检测,direction_status:0:进入,1:离开,6:接近,7:远离"
+
+    @property
+    def content_leftright(self):
+        return "monitor_type:1:左右检测,direction_status:2:左进 3:右出 4:右进 5:左出 6:接近 7:远离"
+
+    def convert_res_to_attr(self, res_name, res_value):
+        if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
+            return super().convert_res_to_attr(res_name, res_value)
+        if res_name in ["direction_status", "monitor_type"]:
+            return res_value
+
+        self._attr_is_on = int(res_value) == 1
+        self.schedule_update_ha_state()
+        return int(res_value) == 1
 
 
 class AiotDoorBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):

@@ -56,7 +56,7 @@ AIOT_DEVICE_MAPPING = [{
     'params': []
 }, {
     # 单路控制器（零火版）
-    'lumi.switch.n0acn2': ["Aqara","Wall Switch (Single Rocker)", ""],
+    'lumi.switch.n0acn2': ["Aqara", "Wall Switch (Single Rocker)", ""],
     # 墙壁开关（零火线单键版）
     'lumi.ctrl_ln1.v1': ["Aqara", "Wall Switch (Single Rocker)", ""],
     # 墙壁开关H1M（零火线单键版）
@@ -71,10 +71,9 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.switch.b1nacn02': ["Aqara", "Wall Switch D1 (Single Rocker)", ""],
     # 墙壁开关E1（零火线单键版）
     'lumi.switch.b1nc01': ["Aqara", "Wall Switch E1 (Single Rocker)", ""],
-    
     # 单路控制器 T1（单火版）
     'lumi.switch.l0acn1': ["Aqara", "Wall Switch (Single Rocker)", ""],
-    # 墙壁开关（单火线单键版） 
+    # 墙壁开关（单火线单键版）
     'lumi.ctrl_neutral1.v1': ["Aqara", "Wall Switch (Single Rocker)", "QBKG04LM"],
     # 墙壁开关X1（单火线单键版）
     'lumi.switch.acn001':["Aqara", "Wall Switch X1 (Single Rocker)", ""],
@@ -114,8 +113,7 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.switch.b2nacn02': ["Aqara", "Wall Switch D1 (Double Rocker)", ""],
     # 墙壁开关E1（零火线双键版）
     'lumi.switch.b2nc01': ["Aqara", "Wall Switch E1 (Double Rocker)", ""],
-    
-    # 墙壁开关（单火线双键版） 
+    # 墙壁开关（单火线双键版）
     'lumi.ctrl_neutral2.v1': ["Aqara", "Wall Switch (Double Rocker)", "QBKG04LM"],
     # 墙壁开关X1（单火线双键版）
     'lumi.switch.acn002':["Aqara", "Wall Switch X1 (Double Rocker)", ""],
@@ -127,7 +125,6 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.switch.b2lacn02': ["Aqara", "Wall Switch D1 (Double Rocker)", "QBKG21LM"],
     # 墙壁开关E1（单火线双键版）
     'lumi.switch.b2lc04': ["Aqara", "Wall Switch E1 (Double Rocker)", "QBKG21LM"],
-
     'params': [
         {
             "switch": {
@@ -151,14 +148,14 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.switch.n3acn1':["Aqara", "Wall Switch H1 (Three Rocker)", "QBKG27LM"],
     # 墙壁开关T1（零火线三键版）
     'lumi.switch.b3n01': ["Aqara", "Wall Switch T1 (Three Rocker)", ""],
-    
     # 墙壁开关X1（单火线双键版）
     'lumi.switch.acn003':["Aqara", "Wall Switch X1 (Three Rocker)", ""],
     # 墙壁开关H1（单火线三键版）
     'lumi.switch.l3acn1':["Aqara", "Wall Switch H1 (Three Rocker)", "QBKG29LM"],
     # 墙壁开关T1（单火线三键版）
     'lumi.switch.b3l01': ["Aqara", "Wall Switch T1 (Three Rocker)", ""],
-
+    # # 妙控开关S1E（零火线三键版、无线开关6个）
+    # 'lumi.switch.acn032':["Aqara", "Wall Switch S1E WIFI 3+6", ""],
     'params': [
         {
             "switch": {
@@ -186,7 +183,6 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.plug.sacn03': ["Aqara", "Smart Wall Outlet H1(USB)", "QBCZWG11LM"],
     # 智能墙壁插座 H1
     'lumi.plug.sacn02': ["Aqara", "Smart Wall Outlet H1", "QBCZWG11LM"],
-   
     'params': [
         {
             "switch": {
@@ -220,7 +216,95 @@ AIOT_DEVICE_MAPPING = [{
             }
         }
     ]
-},{
+},
+    {
+    # light with brightness and color temp
+    'lumi.light.aqcn02': ["Aqara", "Bulb", "ZNLDP12LM"],
+    'lumi.light.cwopcn02': ["Aqara", "Opple MX650", "XDD12LM"],
+    'lumi.light.cwopcn03': ["Aqara", "Opple MX480", "XDD13LM"],
+    'lumi.light.cwacn1': ["Aqara", "0-10V Dimmer", "ZNTGMK12LM"],
+    'lumi.light.cwjwcn01': ["Aqara", "Jiawen 0-12V Dimmer", "Z204"],
+    'params': [
+        {
+            "light": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "light",
+                    "supported_features": SUPPORT_BRIGHTNESS | SUPPORT_COLOR,
+                    "color_mode": "hs",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("4.1.85", "_attr_is_on"),
+                    "brightness": ("14.1.85", "_attr_brightness"),
+                    "color_temp": ("14.2.85", "_attr_color_temp"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
+                }
+            }
+        }
+    ]
+}, {
+    # light with brightness and color temp
+    'lumi.light.cwac02': ["Aqara", "Bulb T1", "ZNLDP13LM"],
+    'params': [
+        {
+            "light": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "light",
+                    "supported_features": SUPPORT_BRIGHTNESS | SUPPORT_COLOR_TEMP,
+                    "color_mode": "hs",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("4.1.85", "_attr_is_on"),
+                    "brightness": ("1.7.85", "_attr_brightness"),
+                    "color_temp": ("1.9.85", "_attr_color_temp"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
+                }
+            }
+        }
+    ]
+}, {
+    'lumi.light.rgbac1': ["Aqara", "RGBW LED Controller T1", "ZNTGMK11LM"],
+    'params': [
+        {
+            "light": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "light",
+                    "supported_features": SUPPORT_BRIGHTNESS | SUPPORT_COLOR,
+                    "color_mode": "xy",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("4.1.85", "_attr_is_on"),
+                    "brightness": ("14.1.85", "_attr_brightness"),
+                    "color_temp": ("14.2.85", "_attr_color_temp"),
+                    "color": ("14.8.85", "_attr_hs_color"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
+                }
+            }
+        }
+    ]
+}, {
+    'lumi.dimmer.rcbac1': ["Aqara", "RGBW LED Dimmer", "ZNDDMK11LM"],
+    'params': [
+        {
+            "light": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "light",
+                    # 颜色模式XY转换有问题，无法根据云端值拆分计算
+                    "supported_features": SUPPORT_BRIGHTNESS | SUPPORT_COLOR_TEMP,
+                    "color_mode": "xy",
+                    "min_mireds": 153,
+                    "max_mireds": 370
+                },
+                MK_RESOURCES: {
+                    "toggle": ("4.1.85", "_attr_is_on"),
+                    "brightness": ("14.1.85", "_attr_brightness"),
+                    "color_temp": ("14.2.85", "_attr_color_temp"),
+                    "color": ("14.8.85", "_attr_hs_color"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi")
+                }
+            }
+        }
+    ]
+}, {
     # 无线开关（贴墙式单键版）
     'lumi.remote.b186acn01': ["Aqara", "Single Wall Button", "WXKG03LM"],
     # 无线开关T1
@@ -311,7 +395,7 @@ AIOT_DEVICE_MAPPING = [{
             }
         }
     ]
-},{
+}, {
     # 小米温湿度传感器
     'lumi.sensor_ht.v1': ["Xiaomi", "TH Sensor", "WSDCGQ01LM"],
     # 温湿度传感器T1
@@ -341,7 +425,7 @@ AIOT_DEVICE_MAPPING = [{
             }
         }
     ]
-},{
+}, {
     # 高精度人体传感器
     'lumi.motion.agl04': ["Aqara", "Precision Motion Sensor", "RTCGQ13LM"],
     # 小米-人体移动传感器
@@ -364,18 +448,21 @@ AIOT_DEVICE_MAPPING = [{
             }
         }
     ]
-},{
+},
+    {
     # 人体存在
     'lumi.motion.ac01': ["Aqara", "Presence Sensor FP1", "RTCZCGQ11LM"],
     'params': [
         {
             "binary_sensor": {
                 MK_INIT_PARAMS: {
-                    MK_HASS_NAME: "motion",
+                    MK_HASS_NAME: "exist",
                     "device_class": DEVICE_CLASS_MOTION
                 },
                 MK_RESOURCES: {
-                    "motion": ("3.51.85", "_attr_native_value"),
+                    "exist": ("4.1.85", "_attr_native_value"),
+                    "monitor_type": ("3.51.85", "_attr_monitor_type"),
+                    "direction_status": ("13.27.85", "_attr_direction_status"),
                     "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi")
                 },
             }
@@ -443,7 +530,35 @@ AIOT_DEVICE_MAPPING = [{
                     "smoke": ("13.1.85", "_attr_is_on")
                 },
             }
-        }, 
+        },
+    ]
+}, {
+    #P100门锁
+    'aqara.lock.wbzac1': ["Aqara", "DoorLock P100", ""],
+    'params': [
+        {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "contact",
+                    "device_class": DEVICE_CLASS_DOOR
+                },
+                MK_RESOURCES: {
+                    "status": ("13.12.85", "_attr_native_value"),
+                },
+            }
+        }, {
+            "sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "contact",
+                    "device_class": "",
+                    "state_class": "",
+                    "unit_of_measurement": ""
+                },
+                MK_RESOURCES: {
+                    "status": ("13.2.85", "_attr_native_value")
+                },
+            }
+        }
     ]
 }
 ]
