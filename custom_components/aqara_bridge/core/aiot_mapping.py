@@ -54,7 +54,8 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.gateway.iragl8': ["Aqara", "GateWay M2 22", ""],
     'lumi.gateway.aq1': ["Aqara", "GateWay M2", ""],
     'params': []
-}, {
+}
+, {
     # 单路控制器（零火版）
     'lumi.switch.n0acn2': ["Aqara", "Wall Switch (Single Rocker)", ""],
     # 墙壁开关（零火线单键版）
@@ -426,8 +427,6 @@ AIOT_DEVICE_MAPPING = [{
         }
     ]
 }, {
-    # 高精度人体传感器
-    'lumi.motion.agl04': ["Aqara", "Precision Motion Sensor", "RTCGQ13LM"],
     # 小米-人体移动传感器
     'lumi.sensor_motion.v1': ["Xiaomi", "Motion Sensor", "RTCGQ01LM"],
     'lumi.sensor_motion.v2': ["Xiaomi", "Motion Sensor", "RTCGQ01LM"],
@@ -448,8 +447,26 @@ AIOT_DEVICE_MAPPING = [{
             }
         }
     ]
-},
-    {
+} , {
+    # 高精度人体传感器
+    'lumi.motion.agl04': ["Aqara", "Precision Motion Sensor", "RTCGQ13LM"],
+    'params': [
+        {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "motion",
+                    "device_class": DEVICE_CLASS_MOTION
+                },
+                MK_RESOURCES: {
+                    "motion": ("3.1.85", "_attr_native_value"),
+                    "detect_time": ("8.0.2115","_attr_detect_time"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
+                    "voltage": ("8.0.2008", "_attr_voltage")
+                },
+            }
+        }
+    ]
+}, {
     # 人体存在
     'lumi.motion.ac01': ["Aqara", "Presence Sensor FP1", "RTCZCGQ11LM"],
     'params': [
