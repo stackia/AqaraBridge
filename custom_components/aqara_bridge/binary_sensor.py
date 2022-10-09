@@ -61,12 +61,17 @@ class AiotBinarySensorEntity(AiotEntityBase, BinarySensorEntity):
 class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
     def __init__(self, hass, device, res_params, channel=None, **kwargs):
         AiotBinarySensorEntity.__init__(self, hass, device, res_params, channel, **kwargs)
-        self._default_delay = 120
+        self._attr_detect_time = 120
         self._last_on = 0
         self._last_off = 0
         self._timeout_pos = 0
         self._unsub_set_no_motion = None
         self._attr_is_on = False
+        self._extra_state_attributes.extend(["detect_time"])
+    
+    @property
+    def detect_time(self):
+        return self._attr_detect_time
     
     async def _start_no_motion_timer(self, delay: float):
         if self._unsub_set_no_motion:
@@ -88,7 +93,7 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         })
 
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
+        if res_name in ["detect_time", "firmware_version", "zigbee_lqi", "voltage"]:
             return super().convert_res_to_attr(res_name, res_value)
 
         if self._last_on == 0 and self.trigger_time is not None:
@@ -101,7 +106,7 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
             return
         self._attr_is_on = bool(res_value)
         # 检查是否超过最长delay时间，超过未无人状态
-        if time_now - self._last_on > self._default_delay:
+        if time_now - self._last_on > self.detect_time:
             self._attr_is_on = False
 
         self._last_on = time_now
@@ -115,7 +120,7 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         custom = self.hass.data[DATA_CUSTOMIZE].get(self.entity_id)
         # if customize of any entity will be changed from GUI - default value
         # for all motion sensors will be erased
-        timeout = custom.get(CONF_OCCUPANCY_TIMEOUT, self._default_delay)
+        timeout = custom.get(CONF_OCCUPANCY_TIMEOUT, self.detect_time)
         if timeout:
             if isinstance(timeout, list):
                 pos = min(self._timeout_pos, len(timeout) - 1)
