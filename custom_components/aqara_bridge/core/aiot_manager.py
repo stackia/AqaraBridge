@@ -561,6 +561,10 @@ class AiotManager:
                         )
                         self._devices_entities[device.did].append(instance)
                         entities.append(instance)
+                        # 订阅资源
+                        resource_ids = [v[0].format(i+1) for k,v in params[j][MK_RESOURCES].items()]
+                        if len(resource_ids) > 0:
+                            await self._session.async_subscribe_resources(device.did, resource_ids)
             else:
                 for i in range(len(params)):
                     attr = params[i].get(MK_INIT_PARAMS)[MK_HASS_NAME]
@@ -575,6 +579,10 @@ class AiotManager:
                     )
                     self._devices_entities[device.did].append(instance)
                     entities.append(instance)
+                    # 订阅资源
+                    resource_ids = [v[0] for k,v in  params[i][MK_RESOURCES].items()]
+                    if len(resource_ids) > 0:
+                        await self._session.async_subscribe_resources(device.did, resource_ids)
         async_add_entities(entities, update_before_add=True)
 
     async def async_remove_entry(self, config_entry):
