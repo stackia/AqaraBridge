@@ -173,7 +173,7 @@ class AiotEntityBase(Entity):
     @property
     def trigger_dt(self):
         if self.trigger_time is not None:
-            return datetime.fromtimestamp(self.trigger_time, local_zone())
+            return datetime.fromtimestamp(self.trigger_time, local_zone(self.hass))
 
     @property
     def extra_state_attributes(self):

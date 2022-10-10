@@ -46,9 +46,9 @@ class AiotButtonEntity(AiotEntityBase, SensorEntity):
     @property
     def native_value(self):
         if self.trigger_time is not None:
-            return datetime.fromtimestamp(self.trigger_time, local_zone())
+            return datetime.fromtimestamp(self.trigger_time, local_zone(self.hass))
         else:
-            return datetime.fromtimestamp(time.time(), local_zone())
+            return datetime.fromtimestamp(time.time(), local_zone(self.hass))
 
     @property
     def press_type(self):

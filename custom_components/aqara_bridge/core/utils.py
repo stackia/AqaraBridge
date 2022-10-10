@@ -2,7 +2,6 @@
 import logging
 import re
 import uuid
-import locale
 import tzlocal
 from datetime import datetime
 from aiohttp import web
