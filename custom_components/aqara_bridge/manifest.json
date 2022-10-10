@@ -8,5 +8,5 @@
     "requirements": ["rocketmq", "tzlocal"],
     "dependencies": [],
     "codeowners": ["@angeljanne","@meishild"],
-    "version": "v0.1.2"
+    "version": "v0.2.0"
   }
