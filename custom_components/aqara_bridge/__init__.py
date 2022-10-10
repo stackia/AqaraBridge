@@ -79,10 +79,10 @@ async def async_setup_entry(hass, entry):
         entry.add_update_listener(async_update_options)
 
     data = entry.data.copy()
-    if DEBUG_STATUS:
+    if _DEBUG_STATUS:
         import time
-        data[CONF_ENTRY_AUTH_REFRESH_TOKEN] = DEBUG_REFRESHTOEEN
-        data[CONF_ENTRY_AUTH_ACCESS_TOKEN] = DEBUG_ACCESSTOKEN
+        data[CONF_ENTRY_AUTH_REFRESH_TOKEN] = _DEBUG_REFRESHTOEEN
+        data[CONF_ENTRY_AUTH_ACCESS_TOKEN] = _DEBUG_ACCESSTOKEN
         data[CONF_ENTRY_AUTH_EXPIRES_TIME] = time.strftime("%Y-%m-%d %H:%M:%S", 
             time.localtime(time.time() + 24 * 3600))
 
