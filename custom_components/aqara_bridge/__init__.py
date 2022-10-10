@@ -79,49 +79,47 @@ async def async_setup_entry(hass, entry):
         entry.add_update_listener(async_update_options)
 
     data = entry.data.copy()
-    if _DEBUG_STATUS:
+    if DEBUG_STATUS:
         import time
-        data[CONF_ENTRY_AUTH_REFRESH_TOKEN] = _DEBUG_REFRESHTOEEN
-        data[CONF_ENTRY_AUTH_ACCESS_TOKEN] = _DEBUG_ACCESSTOKEN
+        data[CONF_ENTRY_AUTH_REFRESH_TOKEN] = DEBUG_REFRESHTOEEN
+        data[CONF_ENTRY_AUTH_ACCESS_TOKEN] = DEBUG_ACCESSTOKEN
         data[CONF_ENTRY_AUTH_EXPIRES_TIME] = time.strftime("%Y-%m-%d %H:%M:%S", 
             time.localtime(time.time() + 24 * 3600))
 
     manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
-    if CONF_ENTRY_AUTH_ACCOUNT in entry.data:
-        aiotcloud: AiotCloud = hass.data[DOMAIN][HASS_DATA_AIOTCLOUD]
-        aiotcloud.set_options(entry.options)
-        aiotcloud.update_token_event_callback = token_updated
-        if (
-            datetime.datetime.strptime(
-                data.get(CONF_ENTRY_AUTH_EXPIRES_TIME), "%Y-%m-%d %H:%M:%S"
+    aiotcloud: AiotCloud = hass.data[DOMAIN][HASS_DATA_AIOTCLOUD]
+    aiotcloud.set_options(entry.options)
+    aiotcloud.update_token_event_callback = token_updated
+    if (
+        datetime.datetime.strptime(
+            data.get(CONF_ENTRY_AUTH_EXPIRES_TIME), "%Y-%m-%d %H:%M:%S"
+        )
+        <= datetime.datetime.now()
+    ):
+        resp = aiotcloud.async_refresh_token(
+            data.get(CONF_ENTRY_AUTH_REFRESH_TOKEN)
+        )
+        if isinstance(resp, dict) and resp["code"] == 0:
+            auth_entry = gen_auth_entry(
+                data.get(CONF_ENTRY_AUTH_ACCOUNT),
+                data.get(CONF_ENTRY_AUTH_ACCOUNT_TYPE),
+                data.get(CONF_ENTRY_AUTH_COUNTRY_CODE),
+                resp["result"],
             )
-            <= datetime.datetime.now()
-        ):
-            resp = aiotcloud.async_refresh_token(
-                data.get(CONF_ENTRY_AUTH_REFRESH_TOKEN)
-            )
-            if isinstance(resp, dict) and resp["code"] == 0:
-                auth_entry = gen_auth_entry(
-                    data.get(CONF_ENTRY_AUTH_ACCOUNT),
-                    data.get(CONF_ENTRY_AUTH_ACCOUNT_TYPE),
-                    data.get(CONF_ENTRY_AUTH_COUNTRY_CODE),
-                    resp["result"],
-                )
-                hass.config_entries.async_update_entry(entry, data=auth_entry)
-            else:
-                # TODO 这里需要处理刷新令牌失败的情况
-                return False
+            hass.config_entries.async_update_entry(entry, data=auth_entry)
         else:
-            aiotcloud.set_country(data.get(CONF_ENTRY_AUTH_COUNTRY_CODE))
-            aiotcloud.access_token = data.get(CONF_ENTRY_AUTH_ACCESS_TOKEN)
-            aiotcloud.refresh_token = data.get(CONF_ENTRY_AUTH_REFRESH_TOKEN)
-
-        hass.data[DOMAIN][HASS_DATA_AUTH_ENTRY_ID] = entry.entry_id
-        await manager.async_refresh_all_devices()
+            # TODO 这里需要处理刷新令牌失败的情况
+            return False
     else:
-        await manager.async_add_devices(entry, [AiotDevice(**entry.data)], True)
+        aiotcloud.set_country(data.get(CONF_ENTRY_AUTH_COUNTRY_CODE))
+        aiotcloud.access_token = data.get(CONF_ENTRY_AUTH_ACCESS_TOKEN)
+        aiotcloud.refresh_token = data.get(CONF_ENTRY_AUTH_REFRESH_TOKEN)
+        
+    hass.data[DOMAIN][HASS_DATA_AUTH_ENTRY_ID] = entry
+    await manager.async_add_all_devices(entry)
+    # 检查是否为通过选线刷新设备
+    if CONF_ENTRY_OPTION_REFRESH not in data:
         await manager.async_forward_entry_setup(entry)
-
     return True
 
 

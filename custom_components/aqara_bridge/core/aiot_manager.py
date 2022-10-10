@@ -478,38 +478,15 @@ class AiotManager:
             device.position_name = postions[0]['positionName']
             self._all_devices.setdefault(x["did"], device)
 
-    async def async_add_devices(
-        self,
-        config_entry: ConfigEntry,
-        devices: Optional[list],
-        auto_add_sub_devices=False,
-    ):
+    async def async_add_all_devices(self, config_entry: ConfigEntry):
         await self.async_refresh_all_devices()  # 刷新一次所有设备列表
         self._entries_devices.setdefault(config_entry.entry_id, [])
         self._config_entries[config_entry.entry_id] = config_entry
-        for device in devices:
+        for device in self.all_devices:
             # 这里看情况检查did是否已经存在，理论上来说应该不会重复，现在代码未做重复判断
             if device.is_supported:
                 self._managed_devices[device.did] = device
                 self._entries_devices[config_entry.entry_id].append(device.did)
-                if auto_add_sub_devices and device.model_type == 1:
-                    sub_devices = []
-                    [
-                        sub_devices.append(x)
-                        for x in self.all_devices
-                        if x.parent_did == device.did
-                    ]
-                    for sub_device in sub_devices:
-                        if sub_device.is_supported:
-                            device.children.append(sub_device)
-                            self._managed_devices[sub_device.did] = sub_device
-                            self._entries_devices[config_entry.entry_id].append(
-                                sub_device.did
-                            )
-                        else:
-                            _LOGGER.warn(
-                                f"Aqara device is not supported. Deivce model is '{sub_device.model}'."
-                            )
             else:
                 _LOGGER.warn(
                     f"Aqara device is not supported. Deivce model is '{device.model}'."
@@ -523,7 +500,7 @@ class AiotManager:
             if self._managed_devices[x].is_supported:
                 for i in range(len(self._managed_devices[x].platforms)):
                     platforms.extend(self._managed_devices[x].platforms[i].keys())
-
+        
         platforms = set(platforms)
         [
             self._hass.async_create_task(

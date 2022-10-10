@@ -35,12 +35,21 @@
     },
     "options": {
         "step": {
-            "init": {
-                "title": "Bridge Config",
+            "inits": {
                 "data": {
-                    "stats": "Stats",
-                    "debug": "Debug"
-                }
+                    "field_country_code": "Cloud Server Country/Region",
+                    "field_account": "Aqara Home Account (Cellular Number/ Email)",
+                    "field_refresh_token": "Refresh Token (Default use refresh token)"
+                },
+                "description": "Use Aqara Home registered account to refresh.",
+                "title": "Login Aqara Cloud Server"
+            },
+            "get_token": {
+                "data": {
+                    "field_auth_code": "Verification Code via SMS or Email"
+                },
+                "description": "Please input Verification Code",
+                "title": "Login Aqara Cloud Server"
             }
         }
     }
