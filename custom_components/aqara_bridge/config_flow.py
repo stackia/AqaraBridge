@@ -163,16 +163,15 @@ class OptionsFlowHandler(OptionsFlow):
                         self.hass.config_entries.async_update_entry(self.config_entry, data=auth_entry)
                     else:
                         errors['base'] = 'refresh_token_error'
-                else:
-                    # 仅修改debug配置，需要解决多次重复问题
-                    if user_input is not None:
-                        return self.async_create_entry(title='debug', data={CONF_DEBUG: user_input.get(CONF_DEBUG, [])})
             else:
-                resp = await self._session.async_get_auth_code(self.account, 0)
+                resp = await self._session.async_get_auth_code(self._account, 0)
                 if resp["code"] == 0:
                     return await self.async_step_get_token()
                 else:
                     errors['base'] = 'auth_code_error'
+            # 仅修改debug配置，需要解决多次重复问题
+            if user_input is not None:
+                return self.async_create_entry(title='debug', data={CONF_DEBUG: user_input.get(CONF_DEBUG, [])})
         else:
             debug = self.config_entry.options.get(CONF_DEBUG, [])
             prev_input = {
@@ -183,7 +182,7 @@ class OptionsFlowHandler(OptionsFlow):
                 {
                     vol.Required(CONF_FIELD_ACCOUNT, default=prev_input.get(CONF_ENTRY_AUTH_ACCOUNT, vol.UNDEFINED)): str,
                     vol.Required(CONF_FIELD_COUNTRY_CODE, default=SERVER_COUNTRY_CODES_DEFAULT): vol.In(SERVER_COUNTRY_CODES),
-                    vol.Optional(CONF_FIELD_REFRESH_TOKEN, default=prev_input.get(CONF_ENTRY_AUTH_REFRESH_TOKEN, vol.UNDEFINED)): str,
+                    vol.Optional(CONF_FIELD_REFRESH_TOKEN): str,
                     vol.Optional(CONF_DEBUG, default=debug): cv.multi_select(OPT_DEBUG),
                 }
             )
@@ -193,12 +192,12 @@ class OptionsFlowHandler(OptionsFlow):
         errors = {}
         if user_input and CONF_FIELD_AUTH_CODE in user_input:
             auth_code = user_input.get(CONF_FIELD_AUTH_CODE)
-            resp = await self._session.async_get_token(auth_code, self.account, 0)
+            resp = await self._session.async_get_token(auth_code, self._account, 0)
             if resp["code"] == 0:
                 auth_entry = gen_auth_entry(
-                    self.account,
-                    self.account_type,
-                    self.country_code,
+                    self._account,
+                    self._account_type,
+                    self._country_code,
                     resp["result"],
                 )
                 self.hass.config_entries.async_update_entry(self.config_entry, data=auth_entry)
