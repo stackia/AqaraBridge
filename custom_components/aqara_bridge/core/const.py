@@ -28,7 +28,6 @@ CONF_ENTRY_AUTH_EXPIRES_TIME = "expires_datetime"
 CONF_ENTRY_AUTH_ACCESS_TOKEN = "access_token"
 CONF_ENTRY_AUTH_REFRESH_TOKEN = "refresh_token"
 CONF_ENTRY_AUTH_OPENID = "open_id"
-CONF_ENTRY_OPTION_REFRESH = "option_refresh"
 
 # HASS DATA
 HASS_DATA_AUTH_ENTRY_ID = "auth_entry_id"

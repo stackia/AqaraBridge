@@ -52,14 +52,7 @@ class AqaraBridgeFlowHandler(ConfigFlow, domain=DOMAIN):
         self._device_manager = self.hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
         auth_entry_id = self.hass.data[DOMAIN][HASS_DATA_AUTH_ENTRY_ID]
         self._session = self.hass.data[DOMAIN][HASS_DATA_AIOTCLOUD]
-        if auth_entry_id:
-            return await self.async_step_select_devices()
-        else:
-            # self._session = AiotCloud(
-            #     aiohttp_client.async_create_clientsession(self.hass)
-            # )
-            # self.hass.data[DOMAIN][HASS_DATA_AIOTCLOUD] = self._session
-            return await self.async_step_get_auth_code()
+        return await self.async_step_get_auth_code()
 
     async def async_step_get_auth_code(self, user_input=None):
         """Configure an aqara device through the Aqara Cloud."""
@@ -154,22 +147,26 @@ class OptionsFlowHandler(OptionsFlow):
             if self._session is None:
                 self._session = self.hass.data[DOMAIN][HASS_DATA_AIOTCLOUD]
             self._session.set_country(self._country_code)
-
+            
             refresh_token = user_input.get(CONF_FIELD_REFRESH_TOKEN)
             if refresh_token and refresh_token != "":
-                resp = await self._session.async_refresh_token(refresh_token)
-                if resp["code"] == 0:
-                    auth_entry = gen_auth_entry(
-                        self._account,
-                        self._account_type,
-                        self._country_code,
-                        resp["result"],
-                    )
-                    auth_entry[CONF_ENTRY_OPTION_REFRESH] = True
-                    self.hass.config_entries.async_update_entry(self.config_entry, data=auth_entry)
-                    return self.async_abort(reason="complete")
+                # 更新了token值
+                if refresh_token != self._session.refresh_token:
+                    resp = await self._session.async_refresh_token(refresh_token)
+                    if resp["code"] == 0:
+                        auth_entry = gen_auth_entry(
+                            self._account,
+                            self._account_type,
+                            self._country_code,
+                            resp["result"],
+                        )
+                        self.hass.config_entries.async_update_entry(self.config_entry, data=auth_entry)
+                    else:
+                        errors['base'] = 'refresh_token_error'
                 else:
-                    errors['base'] = 'refresh_token_error'
+                    # 仅修改debug配置，需要解决多次重复问题
+                    if user_input is not None:
+                        return self.async_create_entry(title='debug', data={CONF_DEBUG: user_input.get(CONF_DEBUG, [])})
             else:
                 resp = await self._session.async_get_auth_code(self.account, 0)
                 if resp["code"] == 0:
@@ -177,6 +174,7 @@ class OptionsFlowHandler(OptionsFlow):
                 else:
                     errors['base'] = 'auth_code_error'
         else:
+            debug = self.config_entry.options.get(CONF_DEBUG, [])
             prev_input = {
                 **self.config_entry.data,
                 **self.config_entry.options,
@@ -186,6 +184,7 @@ class OptionsFlowHandler(OptionsFlow):
                     vol.Required(CONF_FIELD_ACCOUNT, default=prev_input.get(CONF_ENTRY_AUTH_ACCOUNT, vol.UNDEFINED)): str,
                     vol.Required(CONF_FIELD_COUNTRY_CODE, default=SERVER_COUNTRY_CODES_DEFAULT): vol.In(SERVER_COUNTRY_CODES),
                     vol.Optional(CONF_FIELD_REFRESH_TOKEN, default=prev_input.get(CONF_ENTRY_AUTH_REFRESH_TOKEN, vol.UNDEFINED)): str,
+                    vol.Optional(CONF_DEBUG, default=debug): cv.multi_select(OPT_DEBUG),
                 }
             )
             return self.async_show_form(step_id="init", data_schema=config_scheme, errors=errors)
@@ -202,7 +201,6 @@ class OptionsFlowHandler(OptionsFlow):
                     self.country_code,
                     resp["result"],
                 )
-                auth_entry[CONF_ENTRY_OPTION_REFRESH] = True
                 self.hass.config_entries.async_update_entry(self.config_entry, data=auth_entry)
                 return self.async_abort(reason="complete")
             else:

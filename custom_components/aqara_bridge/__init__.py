@@ -117,9 +117,7 @@ async def async_setup_entry(hass, entry):
         
     hass.data[DOMAIN][HASS_DATA_AUTH_ENTRY_ID] = entry
     await manager.async_add_all_devices(entry)
-    # 检查是否为通过选线刷新设备
-    if CONF_ENTRY_OPTION_REFRESH not in data:
-        await manager.async_forward_entry_setup(entry)
+    await manager.async_forward_entry_setup(entry)
     return True
 
 
