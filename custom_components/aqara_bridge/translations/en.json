@@ -39,7 +39,7 @@
                 "data": {
                     "field_country_code": "Cloud Server Country/Region",
                     "field_account": "Aqara Home Account (Cellular Number/ Email)",
-                    "field_refresh_token": "Refresh Token (Default use refresh token)"
+                    "field_refresh_token": "Refresh Token for Developer"
                 },
                 "description": "Use Aqara Home registered account to refresh.",
                 "title": "Login Aqara Cloud Server"
@@ -51,6 +51,10 @@
                 "description": "Please input Verification Code",
                 "title": "Login Aqara Cloud Server"
             }
+        },
+        "error": {
+            "refresh_token_error": "Refresh Token invalid",
+            "auth_code_error": "SMS or Email Code invalid"
         }
     }
 }

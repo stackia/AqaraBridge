@@ -35,7 +35,7 @@
                 "data": {
                     "field_country_code": "雲服務國家/地區",
                     "field_account": "Aqara Home 帳號（手機號碼）/ 電子郵件",
-                    "field_refresh_token": "刷新令牌（默認刷新使用）"
+                    "field_refresh_token": "刷新令牌（開發用）"
                 },
                 "description": "使用在 Aqara Home 註冊的帳號進行登入刷新。",
                 "title": "登入到 Aqara 雲服務平台"
