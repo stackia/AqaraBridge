@@ -457,7 +457,7 @@ class AiotManager:
             else:
                 _LOGGER.warn("[msg_callback, {}]msg_time:{}, msg_data:{}".format("unknow_message", msg_time, msg['data']))
         except Exception as _:
-            _LOGGER.error("[msg_callback, error]process_message_error.\n" + traceback.format_exc())
+            _LOGGER.error("[msg_callback, error]process_message_error.\n", exc_info=1)
 
     async def async_refresh_all_devices(self):
         """获取Aiot所有设备"""
