@@ -17,9 +17,9 @@ def local_zone(hass=None):
 def ts_format_str_ms(str_timestamp_ms : str,hass=None):
     if str_timestamp_ms:
         timestamp = round(int(str_timestamp_ms)/1000,0)
-        datetime.fromtimestamp(timestamp, local_zone(hass))
+        return datetime.fromtimestamp(timestamp, local_zone(hass))
 
 def ts_format_str_s(str_timestamp_s : str,hass=None):
     if str_timestamp_s:
         timestamp = int(str_timestamp_s)
-        datetime.fromtimestamp(timestamp, local_zone(hass))
+        return datetime.fromtimestamp(timestamp, local_zone(hass))
