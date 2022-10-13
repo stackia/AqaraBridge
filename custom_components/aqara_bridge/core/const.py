@@ -34,15 +34,6 @@ HASS_DATA_AUTH_ENTRY_ID = "auth_entry_id"
 HASS_DATA_AIOTCLOUD = "aiotcloud"
 HASS_DATA_AIOT_MANAGER = "aiot_manager"
 
-CONF_DEBUG = "debug"
-CONF_STATS = "stats"
-
-OPT_DEBUG = {
-    'true': "Basic logs",
-    'verbose': "Verbose logs",
-    'msg': "msg logs"
-}
-
 ATTR_FIRMWARE_VERSION = "firmware_version"
 ATTR_ZIGBEE_LQI = "zigbee_lqi"
 ATTR_VOLTAGE = "voltage"

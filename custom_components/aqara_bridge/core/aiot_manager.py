@@ -17,7 +17,7 @@ from .aiot_mapping import (
     MK_HASS_NAME,
     AIOT_DEVICE_MAPPING,
 )
-from .const import DOMAIN, HASS_DATA_AIOT_MANAGER, CONF_DEBUG
+from .const import DOMAIN, HASS_DATA_AIOT_MANAGER
 from .utils import local_zone
 
 _LOGGER = logging.getLogger(__name__)
@@ -135,10 +135,6 @@ class AiotEntityBase(Entity):
         self._aiot_manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
         self._extra_state_attributes = ["position_name"]
 
-    def debug(self, level: str, message: str):
-        """ deubug function """
-        self._aiot_manager.debug(level, f"{self.entity_id}: {message}")
-
     @property
     def channel(self) -> int:
         return self._channel
@@ -193,7 +189,7 @@ class AiotEntityBase(Entity):
     async def async_set_res_value(self, res_name, value):
         """设置资源值"""
         res_id = self.get_res_id_by_name(res_name)
-        self.debug('verbose', "async_set_res_value {} {} {}".format(self.device.did, res_id, value))
+        _LOGGER.info("async_set_res_value {} {} {}".format(self.device.did, res_id, value))
         return await self._aiot_manager.session.async_write_resource_device(
             self.device.did, res_id, value
         )
@@ -251,7 +247,7 @@ class AiotEntityBase(Entity):
             res_value = attr_value
             current_value = getattr(self, tup_res[1])
             resp = None
-            self.debug('verbose', "set {} with value {} on {}".format(self.device.did, res_value, res_name))
+            _LOGGER.info("set {} with value {} on {}".format(self.device.did, res_value, res_name))
             if current_value != attr_value:
                 res_value = self.convert_attr_to_res(res_name, attr_value)
                 resp = await self.async_set_res_value(res_name, res_value)
@@ -272,7 +268,7 @@ class AiotEntityBase(Entity):
         attr_value = self.convert_res_to_attr(res_name, res_value)
         current_value = getattr(self, tup_res[1], None)
 
-        self.debug("verbose", "set value {} current: {} write: {}".format(attr_value, current_value, write_ha_state))
+        _LOGGER.info("set value {} current: {} write: {}".format(attr_value, current_value, write_ha_state))
         if current_value != attr_value:
             self.__setattr__(tup_res[1], attr_value)
             if write_ha_state:
@@ -280,7 +276,7 @@ class AiotEntityBase(Entity):
 
     async def async_device_connection(self, Open=False):
         """ enable/disable device connection """
-        self.debug('verbose', "async_device_connection {}".format(self.device.did))
+        _LOGGER.info("async_device_connection {}".format(self.device.did))
         if Open:
             return await self._aiot_manager.session.async_write_device_openconnect(
                 self.device.did
@@ -382,22 +378,12 @@ class AiotManager:
     # 插件不支持的设备列表
     _unsupported_devices: Optional[list] = []
 
-    debug_option = ''
-
     def __init__(self, hass: HomeAssistant, session: AiotCloud):
         self._hass = hass
         self._session = session
         self._msg_handler = AiotMessageHandler(asyncio.get_event_loop())
         self._msg_handler.start(self._msg_callback)
         self._options = None
-
-    def debug(self, level: str, message: str):
-        """ deubug function """
-        if self._options is None:
-            self._options = self._session.get_options()
-        self.debug_option = self._options.get('debug', '')
-        if 'true' in self.debug_option and level in self.debug_option:
-            _LOGGER.error(f"{message}")
 
     @property
     def session(self) -> AiotCloud:
@@ -431,7 +417,7 @@ class AiotManager:
         """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
         if msg.get("msgType"):
             # 属性消息，resource_report
-            self.debug('msg', "msgType {}".format(msg['data']))
+            _LOGGER.info("msgType {}".format(msg['data']))
             for x in msg["data"]:
                 entities = self._devices_entities.get(x["subjectId"])
                 if entities:
@@ -439,7 +425,7 @@ class AiotManager:
                         if x["resourceId"] in entity.supported_resources:
                             await entity.async_set_attr(x["resourceId"], x["value"], x["time"])
         elif msg.get("eventType"):
-            self.debug('msg', "eventType {}".format(msg['data']))
+            _LOGGER.info("eventType {}".format(msg['data']))
             # 事件消息
             if msg["eventType"] == "gateway_bind":  # 网关绑定
                 pass

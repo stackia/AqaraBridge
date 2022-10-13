@@ -169,11 +169,7 @@ class OptionsFlowHandler(OptionsFlow):
                     return await self.async_step_get_token()
                 else:
                     errors['base'] = 'auth_code_error'
-            # 仅修改debug配置，需要解决多次重复问题
-            if user_input is not None:
-                return self.async_create_entry(title='debug', data={CONF_DEBUG: user_input.get(CONF_DEBUG, [])})
         else:
-            debug = self.config_entry.options.get(CONF_DEBUG, [])
             prev_input = {
                 **self.config_entry.data,
                 **self.config_entry.options,
@@ -183,7 +179,6 @@ class OptionsFlowHandler(OptionsFlow):
                     vol.Required(CONF_FIELD_ACCOUNT, default=prev_input.get(CONF_ENTRY_AUTH_ACCOUNT, vol.UNDEFINED)): str,
                     vol.Required(CONF_FIELD_COUNTRY_CODE, default=SERVER_COUNTRY_CODES_DEFAULT): vol.In(SERVER_COUNTRY_CODES),
                     vol.Optional(CONF_FIELD_REFRESH_TOKEN): str,
-                    vol.Optional(CONF_DEBUG, default=debug): cv.multi_select(OPT_DEBUG),
                 }
             )
             return self.async_show_form(step_id="init", data_schema=config_scheme, errors=errors)
