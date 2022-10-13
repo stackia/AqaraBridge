@@ -189,7 +189,7 @@ class AiotEntityBase(Entity):
     async def async_set_res_value(self, res_name, value):
         """设置资源值"""
         res_id = self.get_res_id_by_name(res_name)
-        _LOGGER.info("async_set_res_value {} {} {}".format(self.device.did, res_id, value))
+        _LOGGER.info("method:async_set_res_value, device:{}, res_id:{}, set_value:{}".format(self.device.did, res_id, value))
         return await self._aiot_manager.session.async_write_resource_device(
             self.device.did, res_id, value
         )
@@ -247,7 +247,7 @@ class AiotEntityBase(Entity):
             res_value = attr_value
             current_value = getattr(self, tup_res[1])
             resp = None
-            _LOGGER.info("set {} with value {} on {}".format(self.device.did, res_value, res_name))
+            _LOGGER.info("method:async_set_resource, device:{}, res_name:{}, set_value:{}".format(self.device.did, res_name, res_value))
             if current_value != attr_value:
                 res_value = self.convert_attr_to_res(res_name, attr_value)
                 resp = await self.async_set_res_value(res_name, res_value)
@@ -268,7 +268,7 @@ class AiotEntityBase(Entity):
         attr_value = self.convert_res_to_attr(res_name, res_value)
         current_value = getattr(self, tup_res[1], None)
 
-        _LOGGER.info("set value {} current: {} write: {}".format(attr_value, current_value, write_ha_state))
+        _LOGGER.info("method:async_set_attr, device:{}, res_name:{}, set_value:{}".format(self.device.did, res_name, res_value))
         if current_value != attr_value:
             self.__setattr__(tup_res[1], attr_value)
             if write_ha_state:
@@ -415,9 +415,9 @@ class AiotManager:
 
     async def _msg_callback(self, msg):
         """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
+        _LOGGER.info("method:msg_callback, deivce:{} ,event:{}, message:{}".format(self.device.did, msg.get("eventType"), msg['data']))
         if msg.get("msgType"):
             # 属性消息，resource_report
-            _LOGGER.info("msgType {}".format(msg['data']))
             for x in msg["data"]:
                 entities = self._devices_entities.get(x["subjectId"])
                 if entities:
@@ -425,7 +425,6 @@ class AiotManager:
                         if x["resourceId"] in entity.supported_resources:
                             await entity.async_set_attr(x["resourceId"], x["value"], x["time"])
         elif msg.get("eventType"):
-            _LOGGER.info("eventType {}".format(msg['data']))
             # 事件消息
             if msg["eventType"] == "gateway_bind":  # 网关绑定
                 pass
@@ -446,7 +445,7 @@ class AiotManager:
             else:  # 其他事件暂不处理
                 pass
         else:
-            _LOGGER.warn("unknown msg: {}".format(msg))
+            _LOGGER.warn("method:msg_callback, error:unknow_message, deivce:{}, event:{}, message:{}".format(self.device.did, msg.get("eventType"), msg['data']))
 
     async def async_refresh_all_devices(self):
         """获取Aiot所有设备"""
@@ -468,9 +467,7 @@ class AiotManager:
                 self._managed_devices[device.did] = device
                 self._entries_devices[config_entry.entry_id].append(device.did)
             else:
-                _LOGGER.warn(
-                    f"Aqara device is not supported. Deivce model is '{device.model}'."
-                )
+                _LOGGER.warn(f"Aqara device is not supported. Deivce model is '{device.model}'.")
                 continue
 
     async def async_forward_entry_setup(self, config_entry: ConfigEntry):
