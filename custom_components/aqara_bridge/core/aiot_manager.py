@@ -482,11 +482,12 @@ class AiotManager:
                     platforms.extend(self._managed_devices[x].platforms[i].keys())
         
         platforms = set(platforms)
-        for x in platforms:
-            if x not in self._hass.config.components:
-                self._hass.async_create_task(
-                    self._hass.config_entries.async_forward_entry_setup(config_entry, x)
-                )
+        [
+            self._hass.async_create_task(
+                self._hass.config_entries.async_forward_entry_setup(config_entry, x)
+            )
+            for x in platforms
+        ]
 
     async def async_add_entities(
         self, config_entry: ConfigEntry, entity_type: str, cls_list, async_add_entities
@@ -540,10 +541,6 @@ class AiotManager:
                         )
                         self._devices_entities[device.did].append(instance)
                         entities.append(instance)
-                        # 订阅资源，需要使用自己开通的APPID那订阅意义不大，开通所有即可。
-                        # resource_ids = [v[0].format(i+1) for k,v in params[j][MK_RESOURCES].items()]
-                        # if len(resource_ids) > 0:
-                        #     await self._session.async_subscribe_resources(device.did, resource_ids)
             else:
                 for i in range(len(params)):
                     attr = params[i].get(MK_INIT_PARAMS)[MK_HASS_NAME]
@@ -558,10 +555,6 @@ class AiotManager:
                     )
                     self._devices_entities[device.did].append(instance)
                     entities.append(instance)
-                    # 订阅资源，需要使用自己开通的APPID那订阅意义不大，开通所有即可。
-                    # resource_ids = [v[0] for k,v in  params[i][MK_RESOURCES].items()]
-                    # if len(resource_ids) > 0:
-                    #     await self._session.async_subscribe_resources(device.did, resource_ids)
         async_add_entities(entities, update_before_add=True)
 
     async def async_remove_entry(self, config_entry):
