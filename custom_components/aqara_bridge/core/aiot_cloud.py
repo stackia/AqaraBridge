@@ -17,10 +17,6 @@ API_DOMAIN = {
     "GER": "open-ger.aqara.com",
 }
 
-APP_ID = "88110776288481280040ace0"
-KEY_ID = "K.881107763014836224"
-APP_KEY = "t7g6qhx4nmbeqmfq1w6yksucnbrofsgs"
-
 def get_random_string(length: int):
     seq = string.ascii_uppercase + string.digits
     return "".join((random.choice(seq) for _ in range(length)))
@@ -50,9 +46,9 @@ class AiotCloud:
     update_token_event_callback = None
 
     def __init__(self, session: ClientSession):
-        self.app_id = APP_ID
-        self.key_id = KEY_ID
-        self.app_key = APP_KEY
+        self.app_id = None
+        self.key_id = None
+        self.app_key = None
         self.session = session
         self.options = None
         self.set_country("CN")
@@ -69,6 +65,15 @@ class AiotCloud:
         """ set aiot country """
         self.country = country
         self.api_url = f"https://{API_DOMAIN[country]}/v3.0/open/api"
+
+    def set_app_id(self, app_id: str):
+        self.app_id = app_id
+    
+    def set_key_id(self, key_id: str):
+        self.key_id = key_id
+
+    def set_app_key(self, app_key: str):
+        self.app_key = app_key
 
     def _get_request_headers(self):
         """生成Headers"""

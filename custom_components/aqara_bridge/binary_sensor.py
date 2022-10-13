@@ -112,14 +112,14 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         time_now = time.time()
 
         if time_now - self._last_on < 1:
-            _LOGGER.warn("{}time_now:{} < last_on:{}".format(log_info ,time_now, self._last_on))
+            _LOGGER.warn("{}false, time_now:{} < last_on:{}".format(log_info ,time_now, self._last_on))
             return
         self._attr_is_on = bool(res_value)
 
         # 检查是否超过最长delay时间，超过未无人状态
-        if time_now - self._last_on > self.detect_time:
+        if time_now - self.trigger_time > self.detect_time:
             self._attr_is_on = False
-            _LOGGER.info("{}time_now:{} - last_on:{} > detect_time:{}".format(log_info ,time_now, self._last_on, self.detect_time))
+            _LOGGER.info("{}false, time_now:{} - trigger_time:{} > detect_time:{}".format(log_info ,time_now, self.trigger_time, self.detect_time))
             return False
 
         # handle available change

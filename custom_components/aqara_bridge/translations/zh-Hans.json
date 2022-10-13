@@ -12,6 +12,9 @@
                 "data": {
                     "field_country_code": "云服务国家/地区",
                     "field_account": "Aqara Home账号（手机号）",
+                    "field_app_id": "开放平台app_id，可使用默认",
+                    "field_app_key": "开放平台app_key，可使用默认",
+                    "field_ke_id": "开放平台key_id，可使用默认",
                     "field_refresh_token": "刷新令牌（开发用）"
                 },
                 "description": "使用在Aqara Home注册的账号进行登录。",
@@ -32,6 +35,9 @@
                 "data": {
                     "field_country_code": "云服务国家/地区",
                     "field_account": "Aqara Home账号（手机号）",
+                    "field_app_id": "开放平台app_id，可使用默认",
+                    "field_app_key": "开放平台app_key，可使用默认",
+                    "field_ke_id": "开放平台key_id，可使用默认",
                     "field_refresh_token": "刷新令牌（开发用）"
                 },
                 "description": "使用在Aqara Home注册的账号进行登录。",

@@ -7,19 +7,22 @@ CONF_FIELD_COUNTRY_CODE = "field_country_code"
 CONF_FIELD_AUTH_CODE = "field_auth_code"
 CONF_FIELD_SELECTED_DEVICES = "field_selected_devices"
 CONF_FIELD_REFRESH_TOKEN = "field_refresh_token"
-CONF_FIELD_APPID = "field_appid"
-CONF_FIELD_APPKEY = "field_appkey"
-CONF_FIELD_KEYID = "field_keyid"
+CONF_FIELD_APP_ID = "field_app_id"
+CONF_FIELD_APP_KEY = "field_app_key"
+CONF_FIELD_KEY_ID = "field_key_id"
 CONF_OCCUPANCY_TIMEOUT = 'occupancy_timeout'
 
 # Cloud
 SERVER_COUNTRY_CODES = ["CN", "USA", "KR", "RU", "GER"]
 SERVER_COUNTRY_CODES_DEFAULT = "CN"
+DEFAULT_CLOUD_APP_ID = "88110776288481280040ace0"
+DEFAULT_CLOUD_APP_KEY = "t7g6qhx4nmbeqmfq1w6yksucnbrofsgs"
+DEFAULT_CLOUD_KEY_ID = "K.881107763014836224"
 
 # CONFIG ENTRY
-CONF_ENTRY_APPID = "appid"
-CONF_ENTRY_APPKEY = "appkey"
-CONF_ENTRY_KEYID = "keyid"
+CONF_ENTRY_APP_ID = "app_id"
+CONF_ENTRY_APP_KEY = "app_key"
+CONF_ENTRY_KEY_ID = "key_id"
 CONF_ENTRY_AUTH_ACCOUNT = "account"
 CONF_ENTRY_AUTH_ACCOUNT_TYPE = "account_type"
 CONF_ENTRY_AUTH_COUNTRY_CODE = "country_code"

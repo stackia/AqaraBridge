@@ -9,8 +9,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity import DeviceInfo, Entity
 
+from .aiot_cloud import AiotCloud
 
-from .aiot_cloud import AiotCloud, APP_ID, KEY_ID, APP_KEY
 from .aiot_mapping import (
     MK_MAPPING_PARAMS,
     MK_INIT_PARAMS,
@@ -336,12 +336,15 @@ class AiotToggleableEntityBase(AiotEntityBase):
 
 
 class AiotMessageHandler:
-    def __init__(self, loop):
+    def __init__(self, loop, app_id, app_key, key_id):
         self._server = "3rd-subscription.aqara.cn:9876"
+        self._app_id = app_id
+        self._app_key = app_key
+        self._key_id = key_id
         self._loop = loop
-        self._consumer = PushConsumer(APP_ID)
+        self._consumer = PushConsumer(app_id)
         self._consumer.set_namesrv_addr(self._server)
-        self._consumer.set_session_credentials(KEY_ID, APP_KEY, "")
+        self._consumer.set_session_credentials(key_id, app_key, "")
 
     def start(self, callback):
         def consumer_callback(msg: RecvMessage):
@@ -351,9 +354,9 @@ class AiotMessageHandler:
                 self._loop,
             )
 
-        self._consumer.subscribe(APP_ID, consumer_callback)
+        self._consumer.subscribe(self._app_id, consumer_callback)
         self._consumer.start()
-        _LOGGER.info("start_message_customer ---> server:{}, key_id:{}, app_key:{} <---".format(self._server, APP_ID, APP_KEY))
+        _LOGGER.info("start_message_customer ---> server:{}, key_id:{}, app_key:{} <---".format(self._server, self._app_id, self._app_key))
 
     def stop(self):
         self._consumer.shutdown()
@@ -384,8 +387,7 @@ class AiotManager:
     def __init__(self, hass: HomeAssistant, session: AiotCloud):
         self._hass = hass
         self._session = session
-        self._msg_handler = AiotMessageHandler(asyncio.get_event_loop())
-        self._msg_handler.start(self._msg_callback)
+        self._msg_handler = None
         self._options = None
 
     @property
@@ -416,23 +418,30 @@ class AiotManager:
         [devices.append(x) for x in self._all_devices.values() if not x.is_supported]
         return devices
 
+    def start_msg_hanlder(self, app_id, app_key, key_id):
+        self._msg_handler = AiotMessageHandler(asyncio.get_event_loop(), app_id, app_key, key_id)
+        self._msg_handler.start(self._msg_callback)
+
     async def _msg_callback(self, msg):
         try:
-            """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
             msg_time = ts_format_str_ms(msg.get("time"), self._hass)
             if msg.get("msgType"):
-                _LOGGER.info("[msg_callback, {}]msg_time:{}, msg_data:{}".format(
-                    msg.get("msgType"), msg_time, msg['data']))
                 # 属性消息，resource_report
                 for x in msg["data"]:
                     entities = self._devices_entities.get(x["subjectId"])
                     if entities:
+                        is_support = False
                         for entity in entities:
                             if x["resourceId"] in entity.supported_resources:
+                                _LOGGER.info("[msg_callback, {}]msg_time:{}, msg_data:{}".format(
+                                     "async_set_attr", msg_time, msg['data']))
+                                is_support = True
                                 await entity.async_set_attr(x["resourceId"], x["value"], x["time"])
-                            else:
-                                _LOGGER.warn("[msg_callback, unsroprt_resources}]{}, {}:{}".format(
-                                     ts_format_str_ms(x["time"], self._hass), x["resourceId"], x["value"]))
+                        if not is_support:
+                            _LOGGER.warn("[msg_callback, unsupport_resources]{}, {}, {}:{}".format(
+                                ts_format_str_ms(x["time"], self._hass), x["subjectId"], x["resourceId"], x["value"]))
+                    else:
+                        _LOGGER.info("[msg_callback, not_in_devices_entities]{}, {}".format(ts_format_str_ms(x["time"], self._hass), x))
             elif msg.get("eventType"):
                 _LOGGER.info("[msg_callback, {}]msg_time:{}, msg_data:{}".format(msg.get("eventType"), msg_time, msg['data']))
                 # 事件消息
@@ -457,7 +466,7 @@ class AiotManager:
             else:
                 _LOGGER.warn("[msg_callback, {}]msg_time:{}, msg_data:{}".format("unknow_message", msg_time, msg['data']))
         except Exception as _:
-            _LOGGER.error("[msg_callback, error]process_message_error.\n", exc_info=1)
+            _LOGGER.exception("[msg_callback, error]process_message_error.\n")
 
     async def async_refresh_all_devices(self):
         """获取Aiot所有设备"""

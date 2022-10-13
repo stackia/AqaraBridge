@@ -26,9 +26,14 @@ def data_masking(s: str, n: int) -> str:
 
 
 def gen_auth_entry(
-    account: str, account_type: int, country_code: str, token_result: dict
+    app_id: str, app_key: str, key_id: str, 
+    account: str, account_type: int, country_code: str, 
+    token_result: dict
 ):
     auth_entry = {}
+    auth_entry[CONF_ENTRY_APP_ID] = app_id
+    auth_entry[CONF_ENTRY_APP_KEY] = app_key
+    auth_entry[CONF_ENTRY_KEY_ID] = key_id
     auth_entry[CONF_ENTRY_AUTH_ACCOUNT] = account
     auth_entry[CONF_ENTRY_AUTH_ACCOUNT_TYPE] = account_type
     auth_entry[CONF_ENTRY_AUTH_COUNTRY_CODE] = country_code
@@ -82,7 +87,11 @@ async def async_setup_entry(hass, entry):
     manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
     aiotcloud: AiotCloud = hass.data[DOMAIN][HASS_DATA_AIOTCLOUD]
     aiotcloud.set_options(entry.options)
+    aiotcloud.set_app_id(data[CONF_ENTRY_APP_ID])
+    aiotcloud.set_app_key(data[CONF_ENTRY_APP_KEY])
+    aiotcloud.set_key_id(data[CONF_ENTRY_KEY_ID])
     aiotcloud.update_token_event_callback = token_updated
+    manager.start_msg_hanlder(data[CONF_ENTRY_APP_ID], data[CONF_ENTRY_APP_KEY], data[CONF_ENTRY_KEY_ID])
     if (
         datetime.datetime.strptime(
             data.get(CONF_ENTRY_AUTH_EXPIRES_TIME), "%Y-%m-%d %H:%M:%S"
