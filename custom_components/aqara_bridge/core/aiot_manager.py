@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import traceback
 
 from typing import Optional, Union
 from datetime import datetime
@@ -263,12 +264,13 @@ class AiotEntityBase(Entity):
             for k, v in self._res_params.items()
             if v[0].format(self.channel) == res_id
         )
-        self.trigger_time = round(int(timestamp) / 1000.0, 0)
+        self.trigger_time = round(int(timestamp) / 1000.00, 0)
         tup_res = self._res_params.get(res_name)
         attr_value = self.convert_res_to_attr(res_name, res_value)
         current_value = getattr(self, tup_res[1], None)
 
-        _LOGGER.info("method:async_set_attr, device:{}, res_name:{}, set_value:{}".format(self.device.did, res_name, res_value))
+        _LOGGER.info("method:async_set_attr, device:{}, res_name:{}, set_value:{}, trigger_dt:{}".format(
+            self.device.did, res_name, res_value, self.trigger_dt))
         if current_value != attr_value:
             self.__setattr__(tup_res[1], attr_value)
             if write_ha_state:
@@ -336,9 +338,10 @@ class AiotToggleableEntityBase(AiotEntityBase):
 
 class AiotMessageHandler:
     def __init__(self, loop):
+        self._server = "3rd-subscription.aqara.cn:9876"
         self._loop = loop
         self._consumer = PushConsumer(APP_ID)
-        self._consumer.set_namesrv_addr("3rd-subscription.aqara.cn:9876")
+        self._consumer.set_namesrv_addr(self._server)
         self._consumer.set_session_credentials(KEY_ID, APP_KEY, "")
 
     def start(self, callback):
@@ -351,6 +354,7 @@ class AiotMessageHandler:
 
         self._consumer.subscribe(APP_ID, consumer_callback)
         self._consumer.start()
+        _LOGGER.info("method:start_message_customer, server:{}, key_id:{}, app_key:{}".format(self._server, APP_ID, APP_KEY))
 
     def stop(self):
         self._consumer.shutdown()
@@ -414,39 +418,42 @@ class AiotManager:
         return devices
 
     async def _msg_callback(self, msg):
-        """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
-        _LOGGER.info("method:msg_callback, deivce:{} ,event:{}, message:{}".format(self.device.did, msg.get("eventType"), msg['data']))
-        if msg.get("msgType"):
-            # 属性消息，resource_report
-            for x in msg["data"]:
-                entities = self._devices_entities.get(x["subjectId"])
-                if entities:
-                    for entity in entities:
-                        if x["resourceId"] in entity.supported_resources:
-                            await entity.async_set_attr(x["resourceId"], x["value"], x["time"])
-        elif msg.get("eventType"):
-            # 事件消息
-            if msg["eventType"] == "gateway_bind":  # 网关绑定
-                pass
-            elif msg["eventType"] == "subdevice_bind" or msg['cause'] == 11:  # 子设备绑定
-                pass
-            elif msg["eventType"] == "gateway_unbind":  # 网关解绑
-                pass
-            elif msg["eventType"] == "unbind_sub_gw":  # 子设备解绑
-                pass
-            elif msg["eventType"] == "gateway_online":  # 网关在线
-                pass
-            elif msg["eventType"] == "gateway_offline":  # 网关离线
-                pass
-            elif msg["eventType"] == "subdevice_online":  # 子设备在线
-                pass
-            elif msg["eventType"] == "subdevice_offline":  # 子设备离线
-                pass
-            else:  # 其他事件暂不处理
-                pass
-        else:
-            _LOGGER.warn("method:msg_callback, error:unknow_message, deivce:{}, event:{}, message:{}".format(self.device.did, msg.get("eventType"), msg['data']))
-
+        try:
+            """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
+            msg_time = datetime.fromtimestamp(round(int(msg.get("time"))/1000,0), local_zone(self._hass))
+            _LOGGER.info("method:msg_callback, msg_time:{}, event:{}, message:{}".format(msg_time, msg.get("eventType"), msg['data']))
+            if msg.get("msgType"):
+                # 属性消息，resource_report
+                for x in msg["data"]:
+                    entities = self._devices_entities.get(x["subjectId"])
+                    if entities:
+                        for entity in entities:
+                            if x["resourceId"] in entity.supported_resources:
+                                await entity.async_set_attr(x["resourceId"], x["value"], x["time"])
+            elif msg.get("eventType"):
+                # 事件消息
+                if msg["eventType"] == "gateway_bind":  # 网关绑定
+                    pass
+                elif msg["eventType"] == "subdevice_bind" or msg['cause'] == 11:  # 子设备绑定
+                    pass
+                elif msg["eventType"] == "gateway_unbind":  # 网关解绑
+                    pass
+                elif msg["eventType"] == "unbind_sub_gw":  # 子设备解绑
+                    pass
+                elif msg["eventType"] == "gateway_online":  # 网关在线
+                    pass
+                elif msg["eventType"] == "gateway_offline":  # 网关离线
+                    pass
+                elif msg["eventType"] == "subdevice_online":  # 子设备在线
+                    pass
+                elif msg["eventType"] == "subdevice_offline":  # 子设备离线
+                    pass
+                else:  # 其他事件暂不处理
+                    pass
+            else:
+                _LOGGER.warn("method:msg_callback, error:unknow_message, deivce:{}, event:{}, message:{}".format(self.device.did, msg.get("eventType"), msg['data']))
+        except Exception as _:
+            _LOGGER.error("method:msg_callback, error:process_message_error.\n" + traceback.format_exc())
     async def async_refresh_all_devices(self):
         """获取Aiot所有设备"""
         self._all_devices = {}

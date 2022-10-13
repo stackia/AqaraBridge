@@ -93,8 +93,10 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         })
 
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name in ["detect_time", "firmware_version", "zigbee_lqi", "voltage"]:
+        if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
             return super().convert_res_to_attr(res_name, res_value)
+        if res_name in ["detect_time"]:
+            return int(res_value)
 
         if self._last_on == 0 and self.trigger_time is not None:
             self._last_on = self.trigger_time
