@@ -63,7 +63,7 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
     def __init__(self, hass, device, res_params, channel=None, **kwargs):
         AiotBinarySensorEntity.__init__(self, hass, device, res_params, channel, **kwargs)
         # 关闭间隔
-        self._attr_detect_time = 120
+        self._attr_detect_time = 150
         # 最后移动时间
         self._last_on = 0
         self._last_off = 0

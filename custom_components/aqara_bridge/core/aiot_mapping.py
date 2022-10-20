@@ -459,7 +459,8 @@ AIOT_DEVICE_MAPPING = [{
                 },
                 MK_RESOURCES: {
                     "motion": ("3.1.85", "_attr_native_value"),
-                    "detect_time": ("8.0.2115","_attr_detect_time"),
+                    # 没有意义还是会按照120S上报数据
+                    # "detect_time": ("8.0.2115","_attr_detect_time"),
                     "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
                 },
