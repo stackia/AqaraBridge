@@ -56,8 +56,6 @@ AIOT_DEVICE_MAPPING = [{
     'params': []
 }
 , {
-    # 单路控制器（零火版）
-    'lumi.switch.n0acn2': ["Aqara", "Wall Switch (Single Rocker)", ""],
     # 墙壁开关（零火线单键版）
     'lumi.ctrl_ln1.v1': ["Aqara", "Wall Switch (Single Rocker)", ""],
     # 墙壁开关H1M（零火线单键版）
@@ -72,8 +70,6 @@ AIOT_DEVICE_MAPPING = [{
     'lumi.switch.b1nacn02': ["Aqara", "Wall Switch D1 (Single Rocker)", ""],
     # 墙壁开关E1（零火线单键版）
     'lumi.switch.b1nc01': ["Aqara", "Wall Switch E1 (Single Rocker)", ""],
-    # 单路控制器 T1（单火版）
-    'lumi.switch.l0acn1': ["Aqara", "Wall Switch (Single Rocker)", ""],
     # 墙壁开关（单火线单键版）
     'lumi.ctrl_neutral1.v1': ["Aqara", "Wall Switch (Single Rocker)", "QBKG04LM"],
     # 墙壁开关X1（单火线单键版）
@@ -172,6 +168,10 @@ AIOT_DEVICE_MAPPING = [{
         }
     ]
 }, {
+     # 单路控制器（零火版）
+    'lumi.switch.n0acn2': ["Aqara", "Single Switch", ""],
+    # 单路控制器 T1（单火版）
+    'lumi.switch.l0acn1': ["Aqara", "Single Switch", ""],
     # 智能插座 (国标)
     'lumi.plug.v1': ["Xiaomi", "Plug", "ZNCZ02LM"],
     # 智能插座 (国标)
