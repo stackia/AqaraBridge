@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import traceback
 
 from typing import Optional, Union
 from datetime import datetime
@@ -8,8 +9,8 @@ from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity import DeviceInfo, Entity
 
+from .aiot_cloud import AiotCloud
 
-from .aiot_cloud import AiotCloud, APP_ID, KEY_ID, APP_KEY
 from .aiot_mapping import (
     MK_MAPPING_PARAMS,
     MK_INIT_PARAMS,
@@ -17,8 +18,8 @@ from .aiot_mapping import (
     MK_HASS_NAME,
     AIOT_DEVICE_MAPPING,
 )
-from .const import DOMAIN, HASS_DATA_AIOT_MANAGER, CONF_DEBUG
-from .utils import local_zone
+from .const import DOMAIN, HASS_DATA_AIOT_MANAGER
+from .utils import *
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -135,10 +136,6 @@ class AiotEntityBase(Entity):
         self._aiot_manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
         self._extra_state_attributes = ["position_name"]
 
-    def debug(self, message: str):
-        """ deubug function """
-        self._aiot_manager.debug(f"{self.entity_id}: {message}")
-
     @property
     def channel(self) -> int:
         return self._channel
@@ -173,7 +170,7 @@ class AiotEntityBase(Entity):
     @property
     def trigger_dt(self):
         if self.trigger_time is not None:
-            return datetime.fromtimestamp(self.trigger_time, local_zone())
+            return datetime.fromtimestamp(self.trigger_time, local_zone(self.hass))
 
     @property
     def extra_state_attributes(self):
@@ -193,8 +190,7 @@ class AiotEntityBase(Entity):
     async def async_set_res_value(self, res_name, value):
         """设置资源值"""
         res_id = self.get_res_id_by_name(res_name)
-        if 'verbose' in self._aiot_manager.debug_option:
-            self.debug("async_set_res_value {} {} {}".format(self.device.did, res_id, value))
+        _LOGGER.info("method:async_set_res_value, device:{}, res_id:{}, set_value:{}".format(self.device.did, res_id, value))
         return await self._aiot_manager.session.async_write_resource_device(
             self.device.did, res_id, value
         )
@@ -252,8 +248,7 @@ class AiotEntityBase(Entity):
             res_value = attr_value
             current_value = getattr(self, tup_res[1])
             resp = None
-            if 'verbose' in self._aiot_manager.debug_option:
-                self.debug("set {} with value {} on {}".format(self.device.did, res_value, res_name))
+            _LOGGER.info("[set_resource, {}, {}]{}:{}".format(self.device.did, self._attr_name, res_name, res_value))
             if current_value != attr_value:
                 res_value = self.convert_attr_to_res(res_name, attr_value)
                 resp = await self.async_set_res_value(res_name, res_value)
@@ -269,13 +264,12 @@ class AiotEntityBase(Entity):
             for k, v in self._res_params.items()
             if v[0].format(self.channel) == res_id
         )
-        self.trigger_time = round(int(timestamp) / 1000.0, 0)
+        self.trigger_time = round(int(timestamp) / 1000.00, 0)
         tup_res = self._res_params.get(res_name)
         attr_value = self.convert_res_to_attr(res_name, res_value)
         current_value = getattr(self, tup_res[1], None)
 
-        if 'verbose' in self._aiot_manager.debug_option:
-            self.debug("set value {} current: {} write: {}".format(attr_value, current_value, write_ha_state))
+        _LOGGER.info("[set_attr, {}, {}]{}, {}:{}".format(self.device.did, self._attr_name, self.trigger_dt, res_name, res_value))
         if current_value != attr_value:
             self.__setattr__(tup_res[1], attr_value)
             if write_ha_state:
@@ -283,8 +277,7 @@ class AiotEntityBase(Entity):
 
     async def async_device_connection(self, Open=False):
         """ enable/disable device connection """
-        if 'verbose' in self._aiot_manager.debug_option:
-            self.debug("async_device_connection {}".format(self.device.did))
+        _LOGGER.info("async_device_connection {}".format(self.device.did))
         if Open:
             return await self._aiot_manager.session.async_write_device_openconnect(
                 self.device.did
@@ -343,11 +336,15 @@ class AiotToggleableEntityBase(AiotEntityBase):
 
 
 class AiotMessageHandler:
-    def __init__(self, loop):
+    def __init__(self, loop, app_id, app_key, key_id):
+        self._server = "3rd-subscription.aqara.cn:9876"
+        self._app_id = app_id
+        self._app_key = app_key
+        self._key_id = key_id
         self._loop = loop
-        self._consumer = PushConsumer(APP_ID)
-        self._consumer.set_namesrv_addr("3rd-subscription.aqara.cn:9876")
-        self._consumer.set_session_credentials(KEY_ID, APP_KEY, "")
+        self._consumer = PushConsumer(app_id)
+        self._consumer.set_namesrv_addr(self._server)
+        self._consumer.set_session_credentials(key_id, app_key, "")
 
     def start(self, callback):
         def consumer_callback(msg: RecvMessage):
@@ -357,8 +354,9 @@ class AiotMessageHandler:
                 self._loop,
             )
 
-        self._consumer.subscribe(APP_ID, consumer_callback)
+        self._consumer.subscribe(self._app_id, consumer_callback)
         self._consumer.start()
+        _LOGGER.info("start_message_customer ---> server:{}, key_id:{}, app_key:{} <---".format(self._server, self._app_id, self._app_key))
 
     def stop(self):
         self._consumer.shutdown()
@@ -386,22 +384,11 @@ class AiotManager:
     # 插件不支持的设备列表
     _unsupported_devices: Optional[list] = []
 
-    debug_option = ''
-
     def __init__(self, hass: HomeAssistant, session: AiotCloud):
         self._hass = hass
         self._session = session
-        self._msg_handler = AiotMessageHandler(asyncio.get_event_loop())
-        self._msg_handler.start(self._msg_callback)
+        self._msg_handler = None
         self._options = None
-
-    def debug(self, message: str):
-        """ deubug function """
-        if self._options is None:
-            self._options = self._session.get_options()
-        self.debug_option = self._options.get('debug', '')
-        if 'true' in self.debug_option:
-            _LOGGER.error(f"{message}")
 
     @property
     def session(self) -> AiotCloud:
@@ -431,42 +418,55 @@ class AiotManager:
         [devices.append(x) for x in self._all_devices.values() if not x.is_supported]
         return devices
 
+    def start_msg_hanlder(self, app_id, app_key, key_id):
+        self._msg_handler = AiotMessageHandler(asyncio.get_event_loop(), app_id, app_key, key_id)
+        self._msg_handler.start(self._msg_callback)
+
     async def _msg_callback(self, msg):
-        """消息推送格式，见https://opendoc.aqara.cn/docs/%E4%BA%91%E5%AF%B9%E6%8E%A5%E5%BC%80%E5%8F%91%E6%89%8B%E5%86%8C/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81/%E6%B6%88%E6%81%AF%E6%8E%A8%E9%80%81%E6%A0%BC%E5%BC%8F.html"""
-        if msg.get("msgType"):
-            # 属性消息，resource_report
-            if 'msg' in self.debug_option:
-                self.debug("msgType {}".format(msg['data']))
-            for x in msg["data"]:
-                entities = self._devices_entities.get(x["subjectId"])
-                if entities:
-                    for entity in entities:
-                        if x["resourceId"] in entity.supported_resources:
-                            await entity.async_set_attr(x["resourceId"], x["value"], x["time"])
-        elif msg.get("eventType"):
-            if 'msg' in self.debug_option:
-                self.debug("eventType {}".format(msg['data']))
-            # 事件消息
-            if msg["eventType"] == "gateway_bind":  # 网关绑定
-                pass
-            elif msg["eventType"] == "subdevice_bind" or msg['cause'] == 11:  # 子设备绑定
-                pass
-            elif msg["eventType"] == "gateway_unbind":  # 网关解绑
-                pass
-            elif msg["eventType"] == "unbind_sub_gw":  # 子设备解绑
-                pass
-            elif msg["eventType"] == "gateway_online":  # 网关在线
-                pass
-            elif msg["eventType"] == "gateway_offline":  # 网关离线
-                pass
-            elif msg["eventType"] == "subdevice_online":  # 子设备在线
-                pass
-            elif msg["eventType"] == "subdevice_offline":  # 子设备离线
-                pass
-            else:  # 其他事件暂不处理
-                pass
-        else:
-            _LOGGER.warn("unknown msg: {}".format(msg))
+        try:
+            msg_time = ts_format_str_ms(msg.get("time"), self._hass)
+            if msg.get("msgType"):
+                # 属性消息，resource_report
+                for x in msg["data"]:
+                    entities = self._devices_entities.get(x["subjectId"])
+                    if entities:
+                        is_support = False
+                        for entity in entities:
+                            if x["resourceId"] in entity.supported_resources:
+                                _LOGGER.info("[msg_callback, {}]msg_time:{}, msg_data:{}".format(
+                                     "async_set_attr", msg_time, msg['data']))
+                                is_support = True
+                                await entity.async_set_attr(x["resourceId"], x["value"], x["time"])
+                        if not is_support:
+                            _LOGGER.warn("[msg_callback, unsupport_resources]{}, {}, {}:{}".format(
+                                ts_format_str_ms(x["time"], self._hass), x["subjectId"], x["resourceId"], x["value"]))
+                    else:
+                        _LOGGER.info("[msg_callback, not_in_devices_entities]{}, {}".format(ts_format_str_ms(x["time"], self._hass), x))
+            elif msg.get("eventType"):
+                _LOGGER.info("[msg_callback, {}]msg_time:{}, msg_data:{}".format(msg.get("eventType"), msg_time, msg['data']))
+                # 事件消息
+                if msg["eventType"] == "gateway_bind":  # 网关绑定
+                    pass
+                elif msg["eventType"] == "subdevice_bind":  # 子设备绑定
+                    pass
+                elif msg["eventType"] == "gateway_unbind":  # 网关解绑
+                    pass
+                elif msg["eventType"] == "unbind_sub_gw":  # 子设备解绑
+                    pass
+                elif msg["eventType"] == "gateway_online":  # 网关在线
+                    pass
+                elif msg["eventType"] == "gateway_offline":  # 网关离线
+                    pass
+                elif msg["eventType"] == "subdevice_online":  # 子设备在线
+                    pass
+                elif msg["eventType"] == "subdevice_offline":  # 子设备离线
+                    pass
+                else:  # 其他事件暂不处理
+                    pass
+            else:
+                _LOGGER.warn("[msg_callback, {}]msg_time:{}, msg_data:{}".format("unknow_message", msg_time, msg['data']))
+        except Exception as _:
+            _LOGGER.exception("[msg_callback, error]process_message_error.\n")
 
     async def async_refresh_all_devices(self):
         """获取Aiot所有设备"""
@@ -478,42 +478,17 @@ class AiotManager:
             device.position_name = postions[0]['positionName']
             self._all_devices.setdefault(x["did"], device)
 
-    async def async_add_devices(
-        self,
-        config_entry: ConfigEntry,
-        devices: Optional[list],
-        auto_add_sub_devices=False,
-    ):
+    async def async_add_all_devices(self, config_entry: ConfigEntry):
         await self.async_refresh_all_devices()  # 刷新一次所有设备列表
         self._entries_devices.setdefault(config_entry.entry_id, [])
         self._config_entries[config_entry.entry_id] = config_entry
-        for device in devices:
+        for device in self.all_devices:
             # 这里看情况检查did是否已经存在，理论上来说应该不会重复，现在代码未做重复判断
             if device.is_supported:
                 self._managed_devices[device.did] = device
                 self._entries_devices[config_entry.entry_id].append(device.did)
-                if auto_add_sub_devices and device.model_type == 1:
-                    sub_devices = []
-                    [
-                        sub_devices.append(x)
-                        for x in self.all_devices
-                        if x.parent_did == device.did
-                    ]
-                    for sub_device in sub_devices:
-                        if sub_device.is_supported:
-                            device.children.append(sub_device)
-                            self._managed_devices[sub_device.did] = sub_device
-                            self._entries_devices[config_entry.entry_id].append(
-                                sub_device.did
-                            )
-                        else:
-                            _LOGGER.warn(
-                                f"Aqara device is not supported. Deivce model is '{sub_device.model}'."
-                            )
             else:
-                _LOGGER.warn(
-                    f"Aqara device is not supported. Deivce model is '{device.model}'."
-                )
+                _LOGGER.warn(f"Aqara device is not supported. Deivce model is '{device.model}'.")
                 continue
 
     async def async_forward_entry_setup(self, config_entry: ConfigEntry):
@@ -523,7 +498,7 @@ class AiotManager:
             if self._managed_devices[x].is_supported:
                 for i in range(len(self._managed_devices[x].platforms)):
                     platforms.extend(self._managed_devices[x].platforms[i].keys())
-
+        
         platforms = set(platforms)
         [
             self._hass.async_create_task(

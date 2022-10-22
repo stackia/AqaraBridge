@@ -1,4 +1,5 @@
 """Support for Xiaomi Aqara binary sensors."""
+import logging
 import time
 
 from homeassistant.config import DATA_CUSTOMIZE
@@ -12,14 +13,14 @@ from .core.aiot_manager import (
 from .core.const import (
     CONF_OCCUPANCY_TIMEOUT,
     DOMAIN,
-    HASS_DATA_AIOT_MANAGER,
-    PROP_TO_ATTR_BASE
+    HASS_DATA_AIOT_MANAGER
 )
 
 TYPE = "binary_sensor"
 
 DATA_KEY = f"{TYPE}.{DOMAIN}"
 
+_LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
     manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
@@ -61,7 +62,9 @@ class AiotBinarySensorEntity(AiotEntityBase, BinarySensorEntity):
 class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
     def __init__(self, hass, device, res_params, channel=None, **kwargs):
         AiotBinarySensorEntity.__init__(self, hass, device, res_params, channel, **kwargs)
-        self._attr_detect_time = 120
+        # 关闭间隔
+        self._attr_detect_time = 150
+        # 最后移动时间
         self._last_on = 0
         self._last_off = 0
         self._timeout_pos = 0
@@ -93,9 +96,15 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         })
 
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name in ["detect_time", "firmware_version", "zigbee_lqi", "voltage"]:
+        log_info = "[conver_attr, {}, {}]".format(self.device.did, self._attr_name)
+        if res_name in ["firmware_version", "zigbee_lqi", "voltage"]:
             return super().convert_res_to_attr(res_name, res_value)
 
+        # 间隔时间刷新
+        if res_name in ["detect_time"]:
+            return int(res_value)
+
+        # 移动只会有on被触发
         if self._last_on == 0 and self.trigger_time is not None:
             self._last_on = self.trigger_time
 
@@ -103,13 +112,15 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
         time_now = time.time()
 
         if time_now - self._last_on < 1:
+            _LOGGER.warn("{}false, time_now:{} < last_on:{}".format(log_info ,time_now, self._last_on))
             return
         self._attr_is_on = bool(res_value)
-        # 检查是否超过最长delay时间，超过未无人状态
-        if time_now - self._last_on > self.detect_time:
-            self._attr_is_on = False
 
-        self._last_on = time_now
+        # 检查是否超过最长delay时间，超过未无人状态
+        if time_now - self.trigger_time > self.detect_time:
+            self._attr_is_on = False
+            _LOGGER.info("{}false, time_now:{} - trigger_time:{} > detect_time:{}".format(log_info ,time_now, self.trigger_time, self.detect_time))
+            return False
 
         # handle available change
         self.schedule_update_ha_state()
@@ -118,6 +129,7 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
             self._unsub_set_no_motion()
 
         custom = self.hass.data[DATA_CUSTOMIZE].get(self.entity_id)
+
         # if customize of any entity will be changed from GUI - default value
         # for all motion sensors will be erased
         timeout = custom.get(CONF_OCCUPANCY_TIMEOUT, self.detect_time)
@@ -132,11 +144,7 @@ class AiotMotionBinarySensor(AiotBinarySensorEntity, BinarySensorEntity):
             if delay < 0 and time_now + delay < self._last_off:
                 delay *= 2
             self.hass.add_job(self._start_no_motion_timer, delay)
-
-        # repeat event from Aqara integration
-        self.hass.bus.fire('xiaomi_aqara.motion', {
-            'entity_id': self.entity_id
-        })
+        _LOGGER.info("{}conver_value:{}".format(log_info ,bool(res_value)))
         return bool(res_value)
 
 

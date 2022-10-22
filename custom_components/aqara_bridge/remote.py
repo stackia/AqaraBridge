@@ -100,7 +100,7 @@ class AiotRemoteIrda(AiotEntityBase, RemoteEntity):
             while (datetime.utcnow() - start_time) < datetime.timedelta(seconds=timeout):
                 message = await self.hass.async_add_executor_job(
                     self.async_received_learnresult, keyid)
-                self.debug("Message received from device: '%s'", message)
+                # _LOGGER.info("Message received from device: '%s'", message)
 
                 if isinstance(message, dict):
                     log_msg = "Received command is: {}".format(message['ircode'])
