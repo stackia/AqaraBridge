@@ -3,10 +3,11 @@
     "name": "Aqara Bridge",
     "config_flow": true,
     "iot_class": "cloud_polling",
-    "documentation": "",
+    "documentation": "https://github.com/meishild/AqaraBridge",
     "issue_tracker": "",
     "requirements": ["rocketmq", "tzlocal"],
     "dependencies": [],
+    "after_dependencies": ["homekit"],
     "codeowners": ["@angeljanne","@meishild"],
     "version": "v0.2.1"
   }
