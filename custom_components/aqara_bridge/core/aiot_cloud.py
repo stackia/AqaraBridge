@@ -66,6 +66,15 @@ class AiotCloud:
         self.country = country
         self.api_url = f"https://{API_DOMAIN[country]}/v3.0/open/api"
 
+    def get_app_id(self):
+        return self.app_id
+    
+    def get_key_id(self):
+        return self.key_id
+
+    def get_app_key(self):
+        return self.app_key
+
     def set_app_id(self, app_id: str):
         self.app_id = app_id
     

@@ -122,7 +122,7 @@ class AqaraBridgeFlowHandler(ConfigFlow, domain=DOMAIN):
                         )
                     )
                 else:
-                    errors["base"] = "cloud_credentials_incomplete"
+                    errors["base"] = "get_auth_code_error"
             elif CONF_ENTRY_AUTH_ACCOUNT in user_input:
                 return self.async_create_entry(
                     title=data_masking(user_input[CONF_ENTRY_AUTH_ACCOUNT], 4),
@@ -154,10 +154,9 @@ class OptionsFlowHandler(OptionsFlow):
             if self._session is None:
                 self._session = self.hass.data[DOMAIN][HASS_DATA_AIOTCLOUD]
             self._session.set_country(self.country_code)
-            self._session.set_app_id(self.app_id)
-            self._session.set_app_key(self.app_key)
-            self._session.set_key_id(self.key_id)
-
+            self._session.set_app_id(user_input.get(CONF_FIELD_APP_ID))
+            self._session.set_app_key(user_input.get(CONF_FIELD_APP_KEY))
+            self._session.set_key_id(user_input.get(CONF_FIELD_KEY_ID))
             
             refresh_token = user_input.get(CONF_FIELD_REFRESH_TOKEN)
             if refresh_token and refresh_token != "":
@@ -176,7 +175,7 @@ class OptionsFlowHandler(OptionsFlow):
             else:
                 resp = await self._session.async_get_auth_code(self.account, 0)
                 if resp["code"] == 0:
-                    return await self.async_step_get_token()
+                    return await self.async_step_option_get_token()
                 else:
                     errors['base'] = 'auth_code_error'
         else:
@@ -186,31 +185,36 @@ class OptionsFlowHandler(OptionsFlow):
             }
             config_scheme = vol.Schema(
                 {
-                    vol.Required(CONF_FIELD_ACCOUNT, default=prev_input.get(CONF_ENTRY_AUTH_ACCOUNT, vol.UNDEFINED)): str,
-                    vol.Required(CONF_FIELD_COUNTRY_CODE, default=SERVER_COUNTRY_CODES_DEFAULT): vol.In(SERVER_COUNTRY_CODES),
-                    vol.Optional(CONF_FIELD_APP_ID): str,
-                    vol.Optional(CONF_FIELD_APP_KEY): str,
-                    vol.Optional(CONF_FIELD_KEY_ID): str,
+                    vol.Required(CONF_FIELD_ACCOUNT, 
+                        default=prev_input.get(CONF_ENTRY_AUTH_ACCOUNT, vol.UNDEFINED)): str,
+                    vol.Required(CONF_FIELD_COUNTRY_CODE, 
+                        default=prev_input.get(SERVER_COUNTRY_CODES_DEFAULT, vol.UNDEFINED)): vol.In(SERVER_COUNTRY_CODES),
+                    vol.Optional(CONF_FIELD_APP_ID, 
+                        default=prev_input.get(CONF_ENTRY_APP_ID, vol.UNDEFINED)): str,
+                    vol.Optional(CONF_FIELD_APP_KEY, 
+                        default=prev_input.get(CONF_ENTRY_APP_KEY, vol.UNDEFINED)): str,
+                    vol.Optional(CONF_FIELD_KEY_ID, 
+                        default=prev_input.get(CONF_ENTRY_KEY_ID, vol.UNDEFINED)): str,
                     vol.Optional(CONF_FIELD_REFRESH_TOKEN): str,
                 }
             )
             return self.async_show_form(step_id="init", data_schema=config_scheme, errors=errors)
 
-    async def async_step_get_token(self, user_input=None):
+    async def async_step_option_get_token(self, user_input=None):
         errors = {}
         if user_input and CONF_FIELD_AUTH_CODE in user_input:
             auth_code = user_input.get(CONF_FIELD_AUTH_CODE)
             resp = await self._session.async_get_token(auth_code, self.account, 0)
             if resp["code"] == 0:
                 auth_entry = gen_auth_entry(
-                    self.app_id, self.app_key, self.key_id,
+                    self._session.get_app_id(), self._session.get_app_key(), self._session.get_key_id(),
                     self.account, self.account_type, self.country_code,
                     resp["result"],
                 )
                 self.hass.config_entries.async_update_entry(self.config_entry, data=auth_entry)
                 return self.async_abort(reason="complete")
             else:
-                errors["base"] = "cloud_credentials_incomplete"
+                errors["base"] = "auth_code_error"
         return self.async_show_form(
-            step_id="get_token", data_schema=DEVICE_GET_TOKEN_CONFIG, errors=errors
+            step_id="option_get_token", data_schema=DEVICE_GET_TOKEN_CONFIG, errors=errors
         )
