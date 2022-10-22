@@ -1,10 +1,10 @@
 {
     "config": {
         "abort": {
-
+            "complete": "配置完成"
         },
         "error": {
-
+            "get_auth_code_error": "獲取SMS驗證碼異常，請稍後重試"
         },
         "flow_title": "{name}",
         "step": {
@@ -14,17 +14,17 @@
                     "field_account": "Aqara Home账号（手机号）",
                     "field_app_id": "开放平台app_id，可使用默认",
                     "field_app_key": "开放平台app_key，可使用默认",
-                    "field_ke_id": "开放平台key_id，可使用默认",
+                    "field_key_id": "开放平台key_id，可使用默认",
                     "field_refresh_token": "刷新令牌（开发用）"
                 },
                 "description": "使用在Aqara Home注册的账号进行登录。",
-                "title": "更新Aqara云服务平台"
+                "title": "Aqara云服务平台"
             },
             "get_token": {
                 "data": {
-                    "field_auth_code": "短信验证码"
+                    "field_auth_code": "SMS验证码"
                 },
-                "description": "请输入短信验证码。",
+                "description": "请输入SMS验证码。",
                 "title": "登录到Aqara云服务平台"
             }
         }
@@ -37,23 +37,23 @@
                     "field_account": "Aqara Home账号（手机号）",
                     "field_app_id": "开放平台app_id，可使用默认",
                     "field_app_key": "开放平台app_key，可使用默认",
-                    "field_ke_id": "开放平台key_id，可使用默认",
+                    "field_key_id": "开放平台key_id，可使用默认",
                     "field_refresh_token": "刷新令牌（开发用）"
                 },
                 "description": "使用在Aqara Home注册的账号进行登录。",
                 "title": "选项"
             },
-            "get_token": {
+            "option_get_token": {
                 "data": {
-                    "field_auth_code": "短信验证码"
+                    "field_auth_code": "SMS验证码"
                 },
-                "description": "请输入短信验证码。",
+                "description": "请输入SMS验证码。",
                 "title": "选项"
             }
         },
         "error": {
             "refresh_token_error": "刷新令牌错误，无法使用。",
-            "auth_code_error": "短信验证码错误，请重新输入。"
+            "auth_code_error": "SMS验证码错误，请重新输入。"
         }
     }
 }

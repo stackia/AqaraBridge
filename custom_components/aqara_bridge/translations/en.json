@@ -1,10 +1,10 @@
 {
     "config": {
         "abort": {
-
+            "complete": "Config Finish."
         },
         "error": {
-
+            "get_auth_code_error": "Get SMS or Email Code Error."
         },
         "flow_title": "{name}",
         "step": {
@@ -50,7 +50,7 @@
                 "description": "Use Aqara Home registered account to refresh.",
                 "title": "Login Aqara Cloud Server"
             },
-            "get_token": {
+            "option_get_token": {
                 "data": {
                     "field_auth_code": "Verification Code via SMS or Email"
                 },

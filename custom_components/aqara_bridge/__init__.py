@@ -1,4 +1,5 @@
 import datetime
+from email import message
 import re
 import logging
 
@@ -91,6 +92,9 @@ async def async_setup_entry(hass, entry):
     aiotcloud.set_app_key(data[CONF_ENTRY_APP_KEY])
     aiotcloud.set_key_id(data[CONF_ENTRY_KEY_ID])
     aiotcloud.update_token_event_callback = token_updated
+    if manager._msg_handler is not None:
+        # 如果重新配置，重新启动mq
+        manager._msg_handler.stop()
     manager.start_msg_hanlder(data[CONF_ENTRY_APP_ID], data[CONF_ENTRY_APP_KEY], data[CONF_ENTRY_KEY_ID])
     if (
         datetime.datetime.strptime(
@@ -118,8 +122,11 @@ async def async_setup_entry(hass, entry):
         aiotcloud.refresh_token = data.get(CONF_ENTRY_AUTH_REFRESH_TOKEN)
         
     hass.data[DOMAIN][HASS_DATA_AUTH_ENTRY_ID] = entry
-    await manager.async_add_all_devices(entry)
-    await manager.async_forward_entry_setup(entry)
+    if len(manager.all_devices) == 0:
+        await manager.async_add_all_devices(entry)
+        await manager.async_forward_entry_setup(entry)
+    else:
+        await manager.async_add_all_devices(entry)
     return True
 
 
