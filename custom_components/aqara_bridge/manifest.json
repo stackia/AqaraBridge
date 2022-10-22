@@ -9,5 +9,5 @@
     "dependencies": [],
     "after_dependencies": ["homekit"],
     "codeowners": ["@angeljanne","@meishild"],
-    "version": "v0.2.1"
+    "version": "v0.2.2"
   }
