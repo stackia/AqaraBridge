@@ -8,3 +8,5 @@ An integration of home-assistant which supports Aqara IoT Cloud.
 First Step
 
 Apply developer account of [Aqara IoT Cloud](https://developer.aqara.com/register). Then wait for approved. It may takes for several days.
+
+* 银狼新增支持无线旋钮H1，H1 12头磁吸格栅灯，无线按钮（升级版）。同时墙壁开关拆分为两部分，其中零火的加入了电量监测，led驱动模块加了电力监测。
