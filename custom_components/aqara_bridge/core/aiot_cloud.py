@@ -84,7 +84,7 @@ class AiotCloud:
     def set_app_key(self, app_key: str):
         self.app_key = app_key
 
-    def _get_request_headers(self):
+    def _get_request_headers(self, need_access_token=True):
         """生成Headers"""
         nonce = get_random_string(16)
         timestamp = str(int(round(time.time() * 1000)))

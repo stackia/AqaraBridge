@@ -7,23 +7,12 @@ from homeassistant.config_entries import (
     ConfigFlow,
     OptionsFlow,
     ConfigEntry
-    )
+)
 from homeassistant.core import callback
 
 from . import init_hass_data, data_masking, gen_auth_entry
 from .core.const import *
 _LOGGER = logging.getLogger(__name__)
-
-DEVICE_GET_AUTH_CODE_CONFIG = vol.Schema(
-    {
-        vol.Required(CONF_FIELD_ACCOUNT): str,
-        vol.Required(CONF_FIELD_COUNTRY_CODE, default=SERVER_COUNTRY_CODES_DEFAULT): vol.In(SERVER_COUNTRY_CODES),
-        vol.Optional(CONF_FIELD_APP_ID, default=DEFAULT_CLOUD_APP_ID): str,
-        vol.Optional(CONF_FIELD_APP_KEY, default=DEFAULT_CLOUD_APP_KEY): str,
-        vol.Optional(CONF_FIELD_KEY_ID, default=DEFAULT_CLOUD_KEY_ID): str,
-        vol.Optional(CONF_FIELD_REFRESH_TOKEN): str,
-    }
-)
 
 DEVICE_GET_TOKEN_CONFIG = vol.Schema({vol.Required(CONF_FIELD_AUTH_CODE): str})
 
@@ -96,10 +85,28 @@ class AqaraBridgeFlowHandler(ConfigFlow, domain=DOMAIN):
                     return await self.async_step_get_token()
                 else:
                     errors['base'] = 'auth_code_error'
+        def_account = user_input.get(
+            CONF_FIELD_ACCOUNT) if user_input and user_input.get(CONF_FIELD_ACCOUNT) else ""
+        def_country_code = user_input.get(CONF_FIELD_COUNTRY_CODE) if user_input and user_input.get(
+            CONF_FIELD_COUNTRY_CODE) else SERVER_COUNTRY_CODES_DEFAULT
+        def_app_id = user_input.get(CONF_FIELD_APP_ID) if user_input and user_input.get(
+            CONF_FIELD_APP_ID) else DEFAULT_CLOUD_APP_ID
+        def_app_key = user_input.get(CONF_FIELD_APP_KEY) if user_input and user_input.get(
+            CONF_FIELD_APP_KEY) else DEFAULT_CLOUD_APP_KEY
+        def_key_id = user_input.get(CONF_FIELD_KEY_ID) if user_input and user_input.get(
+            CONF_FIELD_KEY_ID) else DEFAULT_CLOUD_KEY_ID
 
+        config_scheme = vol.Schema({
+            vol.Required(CONF_FIELD_ACCOUNT, default=def_account): str,
+            vol.Required(CONF_FIELD_COUNTRY_CODE, default=def_country_code): vol.In(SERVER_COUNTRY_CODES),
+            vol.Required(CONF_FIELD_APP_ID, default=def_app_id): str,
+            vol.Required(CONF_FIELD_APP_KEY, default=def_app_key): str,
+            vol.Required(CONF_FIELD_KEY_ID, default=def_key_id): str,
+            vol.Optional(CONF_FIELD_REFRESH_TOKEN): str,
+        })
         return self.async_show_form(
             step_id="get_auth_code",
-            data_schema=DEVICE_GET_AUTH_CODE_CONFIG,
+            data_schema=config_scheme,
             errors=errors,
         )
 
@@ -135,15 +142,16 @@ class AqaraBridgeFlowHandler(ConfigFlow, domain=DOMAIN):
             step_id="get_token", data_schema=DEVICE_GET_TOKEN_CONFIG, errors=errors
         )
 
+
 class OptionsFlowHandler(OptionsFlow):
     def __init__(self, config_entry):
         """Initialize options flow."""
         self.config_entry = config_entry
         self.account = None
-        self.country_code= None
+        self.country_code = None
         self.account_type = 0
         self._session = None
-        
+
     async def async_step_init(self, user_input=None):
         """Configure an aqara device through the Aqara Cloud."""
         errors = {}
@@ -157,21 +165,22 @@ class OptionsFlowHandler(OptionsFlow):
             self._session.set_app_id(user_input.get(CONF_FIELD_APP_ID))
             self._session.set_app_key(user_input.get(CONF_FIELD_APP_KEY))
             self._session.set_key_id(user_input.get(CONF_FIELD_KEY_ID))
-            
+
             refresh_token = user_input.get(CONF_FIELD_REFRESH_TOKEN)
             if refresh_token and refresh_token != "":
                 # 更新了token值
-                if refresh_token != self._session.refresh_token:
-                    resp = await self._session.async_refresh_token(refresh_token)
-                    if resp["code"] == 0:
-                        auth_entry = gen_auth_entry(
-                            self.app_id, self.app_key, self.key_id,
-                            self.account, self.account_type, self.country_code,
-                            resp["result"],
-                        )
-                        self.hass.config_entries.async_update_entry(self.config_entry, data=auth_entry)
-                    else:
-                        errors['base'] = 'refresh_token_error'
+                resp = await self._session.async_refresh_token(refresh_token)
+                if resp["code"] == 0:
+                    auth_entry = gen_auth_entry(
+                        self._session.get_app_id(), self._session.get_app_key(), self._session.get_key_id(),
+                        self.account, self.account_type, self.country_code,
+                        resp["result"],
+                    )
+                    self.hass.config_entries.async_update_entry(
+                        self.config_entry, data=auth_entry)
+                    return self.async_abort(reason="complete")
+                else:
+                    errors['base'] = 'refresh_token_error'
             else:
                 resp = await self._session.async_get_auth_code(self.account, 0)
                 if resp["code"] == 0:
@@ -185,16 +194,16 @@ class OptionsFlowHandler(OptionsFlow):
             }
             config_scheme = vol.Schema(
                 {
-                    vol.Required(CONF_FIELD_ACCOUNT, 
-                        default=prev_input.get(CONF_ENTRY_AUTH_ACCOUNT, vol.UNDEFINED)): str,
-                    vol.Required(CONF_FIELD_COUNTRY_CODE, 
-                        default=prev_input.get(SERVER_COUNTRY_CODES_DEFAULT, vol.UNDEFINED)): vol.In(SERVER_COUNTRY_CODES),
-                    vol.Optional(CONF_FIELD_APP_ID, 
-                        default=prev_input.get(CONF_ENTRY_APP_ID, vol.UNDEFINED)): str,
-                    vol.Optional(CONF_FIELD_APP_KEY, 
-                        default=prev_input.get(CONF_ENTRY_APP_KEY, vol.UNDEFINED)): str,
-                    vol.Optional(CONF_FIELD_KEY_ID, 
-                        default=prev_input.get(CONF_ENTRY_KEY_ID, vol.UNDEFINED)): str,
+                    vol.Required(CONF_FIELD_ACCOUNT,
+                                 default=prev_input.get(CONF_ENTRY_AUTH_ACCOUNT, vol.UNDEFINED)): str,
+                    vol.Required(CONF_FIELD_COUNTRY_CODE,
+                                 default=prev_input.get(SERVER_COUNTRY_CODES_DEFAULT, vol.UNDEFINED)): vol.In(SERVER_COUNTRY_CODES),
+                    vol.Optional(CONF_FIELD_APP_ID,
+                                 default=prev_input.get(CONF_ENTRY_APP_ID, vol.UNDEFINED)): str,
+                    vol.Optional(CONF_FIELD_APP_KEY,
+                                 default=prev_input.get(CONF_ENTRY_APP_KEY, vol.UNDEFINED)): str,
+                    vol.Optional(CONF_FIELD_KEY_ID,
+                                 default=prev_input.get(CONF_ENTRY_KEY_ID, vol.UNDEFINED)): str,
                     vol.Optional(CONF_FIELD_REFRESH_TOKEN): str,
                 }
             )
@@ -211,7 +220,8 @@ class OptionsFlowHandler(OptionsFlow):
                     self.account, self.account_type, self.country_code,
                     resp["result"],
                 )
-                self.hass.config_entries.async_update_entry(self.config_entry, data=auth_entry)
+                self.hass.config_entries.async_update_entry(
+                    self.config_entry, data=auth_entry)
                 return self.async_abort(reason="complete")
             else:
                 errors["base"] = "auth_code_error"
