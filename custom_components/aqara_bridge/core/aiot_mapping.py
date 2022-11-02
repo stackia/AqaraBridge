@@ -58,6 +58,94 @@ AIOT_DEVICE_MAPPING = [
     'lumi.gateway.aq1': ["Aqara", "GateWay M2", ""],
     'params': []
 },
+###############################绿米G3网关########################################
+{
+    'lumi.camera.gwpagl01': ["Aqara", "Camera Hub G3", "ZNSXJ13LM"],
+    'params': [
+        {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "set_video",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.74.85", "_attr_is_on")
+                }
+            }
+        }, {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "face_detect_enable",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.75.85", "_attr_is_on")
+                }
+            }
+        }, {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "human_detect_enable",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.77.85", "_attr_is_on")
+                }
+            }
+        }, {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "pets_detect_enable",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.78.85", "_attr_is_on")
+                }
+            }
+        }, {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "mdtrigger_enable",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.70.85", "_attr_is_on")
+                }
+            }
+        }, {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "soundtrigger_enable",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.119.85", "_attr_is_on")
+                }
+            }
+        }, {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "gesture_detect_enable",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.76.85", "_attr_is_on")
+                }
+            }
+        }, {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "humans_track_enable",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.122.85", "_attr_is_on")
+                }
+            }
+        }, {
+            "switch": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "pets_track_enable",
+                },
+                MK_RESOURCES: {
+                    "toggle": ("14.123.85", "_attr_is_on")
+                }
+            }
+        }
+    ]
+},
 ################################墙壁开关#########################################
 ###单键
 {

@@ -59,7 +59,7 @@ class AiotDevice:
         self.platforms = None
         self.manufacturer = None
         self.heard_version = None
-        self.resource_names = []
+        self.resource_names = {}
         for device in AIOT_DEVICE_MAPPING:
             if self.model in device:
                 self.platforms = device['params']
@@ -71,11 +71,6 @@ class AiotDevice:
     @property
     def is_supported(self):
         return self.platforms is not None
-    
-    def get_resource_name(self, resource_id):
-        for r in self.resource_names:
-            if r['resourceId'] == resource_id:
-               return r['name']
 
 class AiotEntityBase(Entity):
     def __init__(self, hass, device, res_params, type_name, channel=None, **kwargs):
@@ -91,9 +86,10 @@ class AiotEntityBase(Entity):
             resource_id = v[0].format(channel)
             self._supported_resources.append(resource_id)
             # 获取资源名称
-            resource_name = device.get_resource_name(resource_id)
+            resource_name = device.resource_names.get(resource_id)
             if resource_name is not None:
-                 self._attr_name = resource_name
+                self._attr_name = resource_name
+                break
         
         if self._position_name is not None:
             self._attr_name = "%s-%s" % (self._position_name, self._attr_name)
@@ -122,7 +118,7 @@ class AiotEntityBase(Entity):
     
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device.did)},
-            name=self._attr_name,
+            name=device.device_name,
             model=device.model,
             manufacturer=manufacturer,
             sw_version=device.firmware_version,
@@ -524,7 +520,11 @@ class AiotManager:
                         if entity_type in p:
                             params.append(p[entity_type])
                     break
-            device.resource_names = await self._session.async_query_resource_name([device.did])
+            device.resource_names = {}
+            for resource_def in await self._session.async_query_resource_info(device.model):
+                device.resource_names[resource_def['resourceId']] = resource_def['name']
+            for name_def in await self._session.async_query_resource_name([device.did]):
+                device.resource_names[name_def['resourceId']] = name_def['name']
             ch_count = None
             # 这里需要处理特殊设备
             if device.model == "lumi.airrtc.vrfegl01":
