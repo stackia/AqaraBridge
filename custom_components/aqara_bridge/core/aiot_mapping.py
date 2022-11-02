@@ -4,6 +4,7 @@ from homeassistant.components.climate import *
 from homeassistant.components.remote import *
 from homeassistant.components.binary_sensor import *
 from homeassistant.const import *
+from homeassistant.helpers.entity import EntityCategory
 
 # AiotDevice Mapping
 MK_MAPPING_PARAMS = "mapping_params"
@@ -75,6 +76,7 @@ AIOT_DEVICE_MAPPING = [
             "switch": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "face_detect_enable",
+                    "entity_category": EntityCategory.CONFIG,
                 },
                 MK_RESOURCES: {
                     "toggle": ("14.75.85", "_attr_is_on")
@@ -84,6 +86,7 @@ AIOT_DEVICE_MAPPING = [
             "switch": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "human_detect_enable",
+                    "entity_category": EntityCategory.CONFIG,
                 },
                 MK_RESOURCES: {
                     "toggle": ("14.77.85", "_attr_is_on")
@@ -93,6 +96,7 @@ AIOT_DEVICE_MAPPING = [
             "switch": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "pets_detect_enable",
+                    "entity_category": EntityCategory.CONFIG,
                 },
                 MK_RESOURCES: {
                     "toggle": ("14.78.85", "_attr_is_on")
@@ -102,6 +106,7 @@ AIOT_DEVICE_MAPPING = [
             "switch": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "mdtrigger_enable",
+                    "entity_category": EntityCategory.CONFIG,
                 },
                 MK_RESOURCES: {
                     "toggle": ("14.70.85", "_attr_is_on")
@@ -111,6 +116,7 @@ AIOT_DEVICE_MAPPING = [
             "switch": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "soundtrigger_enable",
+                    "entity_category": EntityCategory.CONFIG,
                 },
                 MK_RESOURCES: {
                     "toggle": ("14.119.85", "_attr_is_on")
@@ -120,6 +126,7 @@ AIOT_DEVICE_MAPPING = [
             "switch": {
                 MK_INIT_PARAMS: {
                     MK_HASS_NAME: "gesture_detect_enable",
+                    "entity_category": EntityCategory.CONFIG,
                 },
                 MK_RESOURCES: {
                     "toggle": ("14.76.85", "_attr_is_on")

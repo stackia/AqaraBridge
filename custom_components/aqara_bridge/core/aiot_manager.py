@@ -128,6 +128,7 @@ class AiotEntityBase(Entity):
         self._attr_supported_features = kwargs.get("supported_features")
         self._attr_unit_of_measurement = kwargs.get("unit_of_measurement")
         self._attr_device_class = kwargs.get("device_class")
+        self._attr_entity_category = kwargs.get("entity_category")
 
         self._aiot_manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
         self._extra_state_attributes = ["position_name"]
