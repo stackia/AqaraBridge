@@ -43,7 +43,7 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
         return self.trigger_dt
 
     def convert_res_to_attr(self, res_name, res_value):
-        if res_name == "battry":
+        if res_name == "battery":
             return int(res_value)
         if res_name == "rotation_angle":
             return int(res_value)
@@ -55,4 +55,6 @@ class AiotSensorEntity(AiotEntityBase, SensorEntity):
             return round(int(res_value) / 100.0, 1)
         if res_name == "humidity":
             return round(int(res_value) / 100.0,1)
+        if res_name == "pressure":
+            return round(int(res_value) / 1000.0,2)
         return super().convert_res_to_attr(res_name, res_value)

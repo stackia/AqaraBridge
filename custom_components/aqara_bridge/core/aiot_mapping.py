@@ -711,6 +711,31 @@ AIOT_DEVICE_MAPPING = [
 {
     # 小米温湿度传感器
     'lumi.sensor_ht.v1': ["Xiaomi", "TH Sensor", "WSDCGQ01LM"],
+    'params': [
+        {
+            "sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "temperature",
+                    "device_class": DEVICE_CLASS_TEMPERATURE,
+                    "state_class": "measurement",
+                    "unit_of_measurement": TEMP_CELSIUS
+                },
+                MK_RESOURCES: {"temperature": ("0.1.85", "_attr_native_value")},
+            }
+        }, {
+            "sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "humidity",
+                    "device_class": DEVICE_CLASS_HUMIDITY,
+                    "state_class": "measurement",
+                    "unit_of_measurement": PERCENTAGE
+                },
+                MK_RESOURCES: {"humidity": ("0.2.85", "_attr_native_value")},
+            }
+        }
+    ]
+},
+{
     # 温湿度传感器T1
     'lumi.sensor_ht.agl02': ["Aqara", "T1 TH Sensor", ""],
     # 温湿度传感器
@@ -736,6 +761,27 @@ AIOT_DEVICE_MAPPING = [
                 },
                 MK_RESOURCES: {"humidity": ("0.2.85", "_attr_native_value")},
             }
+        }, {
+            "sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "pressure",
+                    "device_class": DEVICE_CLASS_PRESSURE,
+                    "state_class": "measurement",
+                    "unit_of_measurement": PRESSURE_KPA
+                },
+                MK_RESOURCES: {"pressure": ("0.3.85", "_attr_native_value")},
+            }
+        }, {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "battery",
+                    "device_class": DEVICE_CLASS_BATTERY,
+                    "entity_category": EntityCategory.DIAGNOSTIC,
+                },
+                MK_RESOURCES: {
+                    "battery": ("8.0.9001", "_attr_is_on")
+                },
+            }
         }
     ]
 },
@@ -746,6 +792,8 @@ AIOT_DEVICE_MAPPING = [
     'lumi.sensor_motion.v2': ["Xiaomi", "Motion Sensor", "RTCGQ01LM"],
     # 人体移动传感器
     'lumi.sensor_motion.aq2': ["Aqara", "Motion Sensor", "RTCGQ11LM"],
+    # 人体传感器E1
+    'lumi.motion.acn001': ["Aqara", "Motion Sensor E1", "RTCGO15LM"],
     'params': [
         {
             "binary_sensor": {
@@ -757,6 +805,17 @@ AIOT_DEVICE_MAPPING = [
                     "motion": ("3.1.85", "_attr_native_value"),
                     "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
+                },
+            }
+        }, {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "battery",
+                    "device_class": DEVICE_CLASS_BATTERY,
+                    "entity_category": EntityCategory.DIAGNOSTIC,
+                },
+                MK_RESOURCES: {
+                    "battery": ("8.0.9001", "_attr_is_on")
                 },
             }
         }
@@ -778,6 +837,17 @@ AIOT_DEVICE_MAPPING = [
                     "detect_time": ("8.0.2115","_attr_detect_time"),
                     "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
+                },
+            }
+        }, {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "battery",
+                    "device_class": DEVICE_CLASS_BATTERY,
+                    "entity_category": EntityCategory.DIAGNOSTIC,
+                },
+                MK_RESOURCES: {
+                    "battery": ("8.0.9001", "_attr_is_on")
                 },
             }
         }
@@ -809,11 +879,29 @@ AIOT_DEVICE_MAPPING = [
     # 门窗传感器
     'lumi.sensor_magnet.v1': ["Xiaomi", "Door Sensor", "MCCGQ01LM"],
     'lumi.sensor_magnet.v2': ["Xiaomi", "Door Sensor", "MCCGQ01LM"],
+    # 门窗传感器E1
+    'lumi.magnet.acn001': ["Aqara", "Door Sensor E1", "MCCGQ14LM"],
+    'params': [
+        {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "contact",
+                    "device_class": DEVICE_CLASS_DOOR
+                },
+                MK_RESOURCES: {
+                    "status": ("3.1.85", "_attr_native_value"),
+                    "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
+                    "voltage": ("8.0.2008", "_attr_voltage")
+                },
+            }
+        }
+    ]
+},
+{
+    # 门窗传感器
     'lumi.sensor_magnet.aq2': ["Aqara", "Door Sensor", "MCCGQ11LM"],
     # 门窗传感器T1
     'lumi.magnet.agl02': ["Aqara", "Door Sensor T1", "MCCGQ12LM"],
-    # 门窗传感器E1
-    'lumi.magnet.acn001': ["Aqara", "Door Sensor E1", "MCCGQ14LM"],
     # 门窗传感器P1
     'lumi.magnet.ac01': ["Aqara", "Door Sensor P1", "MCCGQ13LM"],
     'params': [
@@ -827,6 +915,17 @@ AIOT_DEVICE_MAPPING = [
                     "status": ("3.1.85", "_attr_native_value"),
                     "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
+                },
+            }
+        }, {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "battery",
+                    "device_class": DEVICE_CLASS_BATTERY,
+                    "entity_category": EntityCategory.DIAGNOSTIC,
+                },
+                MK_RESOURCES: {
+                    "battery": ("8.0.9001", "_attr_is_on")
                 },
             }
         }
@@ -850,6 +949,17 @@ AIOT_DEVICE_MAPPING = [
                     "moisture": ("3.1.85", "_attr_is_on"),
                     "zigbee_lqi": ("8.0.2007", "_attr_zigbee_lqi"),
                     "voltage": ("8.0.2008", "_attr_voltage")
+                },
+            }
+        }, {
+            "binary_sensor": {
+                MK_INIT_PARAMS: {
+                    MK_HASS_NAME: "battery",
+                    "device_class": DEVICE_CLASS_BATTERY,
+                    "entity_category": EntityCategory.DIAGNOSTIC,
+                },
+                MK_RESOURCES: {
+                    "battery": ("8.0.9001", "_attr_is_on")
                 },
             }
         }
