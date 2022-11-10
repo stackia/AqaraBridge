@@ -27,9 +27,13 @@ def data_masking(s: str, n: int) -> str:
 
 
 def gen_auth_entry(
-    app_id: str, app_key: str, key_id: str, 
-    account: str, account_type: int, country_code: str, 
-    token_result: dict
+    app_id: str,
+    app_key: str,
+    key_id: str,
+    account: str,
+    account_type: int,
+    country_code: str,
+    token_result: dict,
 ):
     auth_entry = {}
     auth_entry[CONF_ENTRY_APP_ID] = app_id
@@ -58,6 +62,7 @@ def init_hass_data(hass):
     if not hass.data[DOMAIN].get(HASS_DATA_AIOT_MANAGER):
         hass.data[DOMAIN].setdefault(HASS_DATA_AIOT_MANAGER, AiotManager(hass, session))
 
+
 async def async_setup(hass, config):
     """Setup component."""
     init_hass_data(hass)
@@ -65,7 +70,7 @@ async def async_setup(hass, config):
 
 
 async def async_setup_entry(hass, entry):
-    def token_updated(access_token, refresh_token):
+    async def async_token_updated(access_token, refresh_token):
         auth_entry = hass.data[DOMAIN][HASS_DATA_AUTH_ENTRY_ID]
         if auth_entry:
             data = auth_entry.data.copy()
@@ -80,10 +85,12 @@ async def async_setup_entry(hass, entry):
     data = entry.data.copy()
     if _DEBUG_STATUS:
         import time
+
         data[CONF_ENTRY_AUTH_REFRESH_TOKEN] = _DEBUG_REFRESHTOEEN
         data[CONF_ENTRY_AUTH_ACCESS_TOKEN] = _DEBUG_ACCESSTOKEN
-        data[CONF_ENTRY_AUTH_EXPIRES_TIME] = time.strftime("%Y-%m-%d %H:%M:%S", 
-            time.localtime(time.time() + 24 * 3600))
+        data[CONF_ENTRY_AUTH_EXPIRES_TIME] = time.strftime(
+            "%Y-%m-%d %H:%M:%S", time.localtime(time.time() + 24 * 3600)
+        )
 
     manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
     aiotcloud: AiotCloud = hass.data[DOMAIN][HASS_DATA_AIOTCLOUD]
@@ -91,22 +98,27 @@ async def async_setup_entry(hass, entry):
     aiotcloud.set_app_id(data[CONF_ENTRY_APP_ID])
     aiotcloud.set_app_key(data[CONF_ENTRY_APP_KEY])
     aiotcloud.set_key_id(data[CONF_ENTRY_KEY_ID])
-    aiotcloud.update_token_event_callback = token_updated
+    aiotcloud.update_token_event_callback = async_token_updated
     if manager._msg_handler is not None:
         # 如果重新配置，重新启动mq
         manager._msg_handler.stop()
-    manager.start_msg_hanlder(data[CONF_ENTRY_APP_ID], data[CONF_ENTRY_APP_KEY], data[CONF_ENTRY_KEY_ID])
+    manager.start_msg_hanlder(
+        data[CONF_ENTRY_APP_ID], data[CONF_ENTRY_APP_KEY], data[CONF_ENTRY_KEY_ID]
+    )
     if (
         datetime.datetime.strptime(
             data.get(CONF_ENTRY_AUTH_EXPIRES_TIME), "%Y-%m-%d %H:%M:%S"
         )
         <= datetime.datetime.now()
     ):
-        resp = aiotcloud.async_refresh_token(
+        resp = await aiotcloud.async_refresh_token(
             data.get(CONF_ENTRY_AUTH_REFRESH_TOKEN)
         )
         if isinstance(resp, dict) and resp["code"] == 0:
             auth_entry = gen_auth_entry(
+                data.get(CONF_ENTRY_APP_ID),
+                data.get(CONF_ENTRY_APP_KEY),
+                data.get(CONF_ENTRY_KEY_ID),
                 data.get(CONF_ENTRY_AUTH_ACCOUNT),
                 data.get(CONF_ENTRY_AUTH_ACCOUNT_TYPE),
                 data.get(CONF_ENTRY_AUTH_COUNTRY_CODE),
@@ -120,7 +132,7 @@ async def async_setup_entry(hass, entry):
         aiotcloud.set_country(data.get(CONF_ENTRY_AUTH_COUNTRY_CODE))
         aiotcloud.access_token = data.get(CONF_ENTRY_AUTH_ACCESS_TOKEN)
         aiotcloud.refresh_token = data.get(CONF_ENTRY_AUTH_REFRESH_TOKEN)
-        
+
     hass.data[DOMAIN][HASS_DATA_AUTH_ENTRY_ID] = entry
     if len(manager.all_devices) == 0:
         await manager.async_add_all_devices(entry)
@@ -149,5 +161,5 @@ async def async_remove_entry(hass, entry):
 
 
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry):
-    """ Update Optioins if available """
+    """Update Optioins if available"""
     await hass.config_entries.async_reload(entry.entry_id)
