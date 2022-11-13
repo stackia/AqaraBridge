@@ -3,6 +3,7 @@ from email import message
 import re
 import logging
 
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers import aiohttp_client
@@ -66,6 +67,10 @@ def init_hass_data(hass):
 async def async_setup(hass, config):
     """Setup component."""
     init_hass_data(hass)
+    manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
+    hass.bus.async_listen_once(
+        EVENT_HOMEASSISTANT_STOP, lambda *args, **kwargs: manager.stop_msg_handler
+    )
     return True
 
 
@@ -99,9 +104,6 @@ async def async_setup_entry(hass, entry):
     aiotcloud.set_app_key(data[CONF_ENTRY_APP_KEY])
     aiotcloud.set_key_id(data[CONF_ENTRY_KEY_ID])
     aiotcloud.update_token_event_callback = async_token_updated
-    if manager._msg_handler is not None:
-        # 如果重新配置，重新启动mq
-        manager._msg_handler.stop()
     manager.start_msg_hanlder(
         data[CONF_ENTRY_APP_ID], data[CONF_ENTRY_APP_KEY], data[CONF_ENTRY_KEY_ID]
     )
@@ -143,11 +145,9 @@ async def async_setup_entry(hass, entry):
 
 
 async def async_unload_entry(hass, entry):
-    # if CONF_ENTRY_AUTH_ACCOUNT in entry.data:
-    #     hass.data[DOMAIN][HASS_DATA_AUTH_ENTRY_ID] = None
-    # else:
-    #     manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
-    #     await manager.async_unload_entry(entry)
+    manager: AiotManager = hass.data[DOMAIN][HASS_DATA_AIOT_MANAGER]
+    manager.stop_msg_handler()
+    await manager.async_forward_entry_unload(entry)
     return True
 
 
